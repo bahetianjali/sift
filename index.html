@@ -1394,7 +1394,7 @@ function doSearch(){
   var demoMatch=companies.filter(function(c){
     return S.mode==="company"
       ?c.name.toLowerCase().indexOf(q.toLowerCase())>-1
-      :c.tags&&c.tags.some(function(t){return t.toLowerCase().indexOf(q.toLowerCase())>-1})||c.desc.toLowerCase().indexOf(q.toLowerCase())>-1||c.name.toLowerCase().indexOf(q.toLowerCase())>-1;
+      :Array.isArray(c.tags)&&c.tags.some(function(t){return t&&t.toLowerCase().indexOf(q.toLowerCase())>-1})||c.desc.toLowerCase().indexOf(q.toLowerCase())>-1||c.name.toLowerCase().indexOf(q.toLowerCase())>-1;
   });
   var key=S.profile.key;
   var hasBio=S.profile.bio&&S.profile.bio.trim().length>10;
@@ -1740,7 +1740,7 @@ function buildProof(data){
         ?'<span style="font-size:10px;font-weight:700;background:var(--p);color:#fff;padding:2px 8px;border-radius:20px;margin-left:6px">Primary</span>'
         :'<span style="font-size:10px;font-weight:700;background:var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;margin-left:6px">Secondary</span>';
       var stepsHtml=p.steps?'<div style="margin:8px 0 10px;padding-left:4px">'
-        +p.steps.map(function(s){return'<div style="font-size:11px;color:var(--ink2);padding:3px 0;border-bottom:1px solid var(--border);display:flex;align-items:baseline;gap:6px"><span style="color:var(--p);font-weight:700;flex-shrink:0">→</span>'+s+'</div>';}).join("")
+        +(Array.isArray(p.steps)?p.steps:[]).map(function(s){return'<div style="font-size:11px;color:var(--ink2);padding:3px 0;border-bottom:1px solid var(--border);display:flex;align-items:baseline;gap:6px"><span style="color:var(--p);font-weight:700;flex-shrink:0">→</span>'+s+'</div>';}).join("")
         +'</div>':"";
       return'<div class="project-card"><div class="project-header"><div class="project-num">'+(i+1)+'</div><div class="project-title" style="flex:1">'+p.title+badge+'</div><div class="project-weekend">'+p.weekends+' weekend'+(p.weekends>1?"s":"")+'</div></div><div class="project-body">'+p.why+'</div>'+stepsHtml+'<div class="project-outcome">'+p.outcome+'</div></div>';
     }).join("");
@@ -1863,12 +1863,24 @@ function buildResults(){
   if(sorted.length===0){cos.innerHTML+='<div style="padding:30px 14px;text-align:center;color:var(--muted);font-size:12px">No companies match this filter.</div>';return;}
   var src=S.usingAI&&S.aiResults&&S.aiResults.length>0?S.aiResults:companies;
   sorted.forEach(function(c){
+  // Ensure required fields exist with defaults
+  c.name=c.name||"Unknown Company";
+  c.desc=c.desc||"";
+  c.meta=c.meta||"";
+  c.fitReason=c.fitReason||"";
+  c.whyShort=c.whyShort||"";
+  c.signals=Array.isArray(c.signals)?c.signals:[];
+  c.people=Array.isArray(c.people)?c.people:[];
+  c.levelUp=Array.isArray(c.levelUp)?c.levelUp:[];
+  c.needs=Array.isArray(c.needs)?c.needs:[];
+  c.tags=Array.isArray(c.tags)?c.tags:[];
+  c.brief=c.brief||{};
   if(c.meta)c.meta=c.meta.split("\n").join(" · ").split("\r").join("").split("|").join(" · ").replace(/  +/g," ").trim();
     var idx=src.indexOf(c);
     var active=S.currentCo===c?" active":"";
     var hb=c.hiring==="active"?'<span class="badge b-hiring">&#9679; Hiring</span>':c.hiring==="selective"?'<span class="badge b-selective">&#9680; Selective</span>':'<span class="badge b-collab">&#129309; Collab</span>';
     var vb=S.intent==="job"?(c.visaSponsors===true?'<span class="badge b-visa-yes">H1B &#10003;</span>':c.visaSponsors===false?'<span class="badge b-visa-no">H1B \u2012</span>':'<span class="badge b-visa-unk">H1B ?</span>'):"";
-    var sigCount=c.signals?c.signals.length:0;
+    var sigCount=(Array.isArray(c.signals)?c.signals.length:0);
     var sb=sigCount>0?'<span class="badge b-signal">&#9889; '+sigCount+'</span>':"";
     var d=document.createElement("div");
     d.className="ccard"+active;
@@ -1886,6 +1898,18 @@ function openCompany(idx){
   var src=(S.usingAI&&S.aiResults&&S.aiResults.length>0)?S.aiResults:companies;
   var c=src[idx];if(!c)return;
   // Normalize meta field — AI sometimes returns newlines or pipes instead of ·
+  // Ensure required fields exist with defaults
+  c.name=c.name||"Unknown Company";
+  c.desc=c.desc||"";
+  c.meta=c.meta||"";
+  c.fitReason=c.fitReason||"";
+  c.whyShort=c.whyShort||"";
+  c.signals=Array.isArray(c.signals)?c.signals:[];
+  c.people=Array.isArray(c.people)?c.people:[];
+  c.levelUp=Array.isArray(c.levelUp)?c.levelUp:[];
+  c.needs=Array.isArray(c.needs)?c.needs:[];
+  c.tags=Array.isArray(c.tags)?c.tags:[];
+  c.brief=c.brief||{};
   if(c.meta)c.meta=c.meta.split("\n").join(" · ").split("\r").join("").split("|").join(" · ").replace(/  +/g," ").trim();
 
   // Normalize tags
@@ -1932,7 +1956,7 @@ function openCompany(idx){
 function buildOverview(c){
   // Fit breakdown block (collapsible)
   var fbHtml="";
-  if(c.fitBreakdown){
+  if(c.fitBreakdown&&typeof c.fitBreakdown==="object"){
     var bd=c.fitBreakdown;
     var rows=[["Domain overlap",bd.domain],["Technical overlap",bd.technical],["Stage fit",bd.stage],["Network proximity",bd.network],["Industry experience",bd.experience]];
     fbHtml='<div class="fit-breakdown" id="fit-breakdown">'+rows.map(function(r){return'<div class="fb-row"><span class="fb-label">'+r[0]+'</span><div class="fb-bar-wrap"><div class="fb-bar" style="width:'+r[1]+'%"></div></div><span class="fb-num">'+r[1]+'</span></div>';}).join("")+'</div>';
@@ -1941,7 +1965,7 @@ function buildOverview(c){
     // Climber: lean — fit reason + fit breakdown + compact factual snapshot
     var snapshotKeys=["Stage","Raised","Team","Domain"];
     var snapshotHtml=snapshotKeys.map(function(k){
-      if(!c.brief[k])return"";
+      if(!c.brief||!c.brief[k])return"";
       var val=c.brief[k];
       if(k==="Domain"){val='<a href="https://'+val+'" target="_blank" style="color:var(--pd);text-decoration:none">'+val+' &#8599;</a>';}
       return'<div class="ov-card"><div class="ov-label">'+k+'</div><div class="ov-val">'+val+'</div></div>';
@@ -1972,8 +1996,8 @@ function buildOverview(c){
 function buildHood(c){
   // Needs card
   var needsHtml="";
-  if(c.needs&&c.needs.length){
-    needsHtml='<div class="needs-card"><div class="needs-title">&#128293; What '+c.name+' Needs Most Right Now</div><ul class="needs-list">'+c.needs.map(function(n){return'<li>'+n+'</li>';}).join("")+'</ul></div>';
+  if(c.needs&&Array.isArray(c.needs)&&c.needs.length){
+    needsHtml='<div class="needs-card"><div class="needs-title">&#128293; What '+c.name+' Needs Most Right Now</div><ul class="needs-list">'+(Array.isArray(c.needs)?c.needs:[]).map(function(n){return'<li>'+n+'</li>';}).join("")+'</ul></div>';
   }
   // Company Thesis
   var thesisRows=[
@@ -2000,11 +2024,11 @@ function toggleFitBreakdown(){
   if(scoreEl){scoreEl.querySelector(".dscore-lbl").textContent=el.classList.contains("open")?"Fit &#9650;":"Fit &#9660;";}
 }
 function buildSignals(c){
-  var feed=(c.signals||[]).filter(function(s){return s&&s.title;}).map(function(s){return'<div class="signal-card"><div class="signal-icon '+(s.iconClass||'sig-product')+'">'+s.icon+'</div><div style="flex:1"><div class="signal-type '+(s.typeClass||'type-product')+'">'+((s.type||'update').toUpperCase())+'</div><div class="signal-title">'+s.title+'</div><div class="signal-detail">'+s.detail+'</div><div class="signal-impact">'+s.impact+'</div><div class="signal-date">'+s.date+'</div></div></div>';}).join("");
+  var feed=(Array.isArray(c.signals)?c.signals:[]).filter(function(s){return s&&s.title;}).map(function(s){return'<div class="signal-card"><div class="signal-icon '+(s.iconClass||'sig-product')+'">'+s.icon+'</div><div style="flex:1"><div class="signal-type '+(s.typeClass||'type-product')+'">'+((s.type||'update').toUpperCase())+'</div><div class="signal-title">'+s.title+'</div><div class="signal-detail">'+s.detail+'</div><div class="signal-impact">'+s.impact+'</div><div class="signal-date">'+s.date+'</div></div></div>';}).join("");
   document.getElementById("d-signals").innerHTML='<div class="why-now-score"><div class="why-num">'+c.opportunity+'</div><div><div class="why-label">Why Now Score</div><div class="why-desc">'+c.opportunityReason+'</div></div></div>'+feed;
 }
 function buildPeople(c){if(!c.people||!c.people.length){document.getElementById("d-people").innerHTML='<div style="color:var(--muted);font-size:13px;padding:20px 0">No people data available for this company.</div>';return;}
-  S.currentPeople=(c.people||[]).filter(function(p){if(!p)return false;var intent=Array.isArray(p.intent)?p.intent:(p.intent?[p.intent]:["collab","job","network"]);if(S.intent==="collab")return intent.indexOf("collab")>-1;if(S.intent==="job")return intent.indexOf("job")>-1||intent.indexOf("collab")>-1;return true;});
+  S.currentPeople=(Array.isArray(c.people)?c.people:[]).filter(function(p){if(!p)return false;var intent=Array.isArray(p.intent)?p.intent:(p.intent?[p.intent]:["collab","job","network"]);if(S.intent==="collab")return intent.indexOf("collab")>-1;if(S.intent==="job")return intent.indexOf("job")>-1||intent.indexOf("collab")>-1;return true;});
   var label=S.intent==="collab"?"Founders & Peers to Reach":S.intent==="job"?"People to Reach for Roles":"People in This Domain";
   var warning='<div style="background:#FFF8E1;border:1px solid #FFD54F;border-radius:8px;padding:9px 12px;font-size:11px;color:#795548;line-height:1.55;margin-bottom:12px">&#9888; <strong>Unverified contacts:</strong> Email addresses and handles are pattern guesses based on naming conventions, not confirmed. Verify before sending.</div>';
   var styleLabels={curious:"Curious",technical:"Technical"};
@@ -2036,9 +2060,9 @@ function buildLevelUp(c){
   var lvlEl=document.getElementById("d-levelup");
   if(!lvlEl)return;
   var intro='<div class="lvlup-intro"><strong>Ambitious Fit framework:</strong> You are at <strong>'+c.fit+'</strong> fit with '+c.name+'. The 30% you build deliberately bridges the gap.</div>';
-  var projs=(c.levelUp||[]).map(function(p,i){
+  var projs=(Array.isArray(c.levelUp)?c.levelUp:[]).map(function(p,i){
   var capsHtml="";
-  if(p.capabilities&&p.capabilities.length){
+  if(p.capabilities&&Array.isArray(p.capabilities)&&p.capabilities.length){
     capsHtml='<div class="project-caps"><div class="project-caps-label">Why this matters</div><ul>'+p.capabilities.map(function(c){return'<li>'+c+'</li>';}).join("")+'</ul></div>';
   }
   return'<div class="project-card"><div class="project-header"><div class="project-num">'+(i+1)+'</div><div class="project-title">'+p.title+'</div><div class="project-weekend">'+p.weekends+' weekend'+(p.weekends>1?"s":"")+'</div></div><div class="project-why">'+p.why+'</div>'+capsHtml+'<div class="project-meta"><div class="pm-item"><div class="pm-label">Stack</div><div class="pm-val">'+p.stack+'</div></div><div class="pm-item"><div class="pm-label">Effort</div><div class="pm-val">'+p.weekends+' weekend'+(p.weekends>1?"s":"")+'</div></div></div><div class="project-outcome">'+p.outcome+'</div></div>';
