@@ -754,7 +754,7 @@ body:not(.app-mode) .main{display:none}
     <div class="modal-sub" id="settings-sub">Your bio personalizes every search. Your API key never leaves your browser.</div>
     <div class="modal-section"><label class="modal-label">Your name</label><input id="setting-name" type="text" placeholder="e.g. Anjali Baheti"></div>
     <div class="modal-section"><label class="modal-label">Your bio</label><textarea id="setting-bio" placeholder="e.g. Backend engineer, 4 years at Movius. Built data pipelines, AI integrations. Open to opportunities in climate tech and AI infrastructure."></textarea><div class="modal-hint">Or paste your LinkedIn URL &mdash; we will read it from there in the real product.</div></div>
-    <div class="modal-section"><label class="modal-label">Anthropic API Key</label><input id="setting-key" type="password" placeholder="sk-ant-..."><div class="modal-hint" id="key-hint">Get a free key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--terra-deep)">console.anthropic.com</a>. Stored only in your browser, never shared.</div></div>
+    <div class="modal-section"><label class="modal-label">Anthropic API Key</label><input id="setting-key" type="password" placeholder="sk-..."><div class="modal-hint" id="key-hint">Get a free key at <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--terra-deep)">platform.openai.com/api-keys</a>. Stored only in your browser, never shared.</div></div>
     <div class="modal-actions"><button class="modal-btn primary" onclick="saveSettings()">Save &amp; Start Sifting</button><button class="modal-btn secondary" id="settings-cancel-btn" onclick="closeSettings()">Cancel</button></div>
   </div>
 </div>
@@ -1341,10 +1341,10 @@ async function siftWithAI(query,key){
   var prompt=isCompany
     ?"You are Sift, an opportunity discovery engine. The user is researching the company: "+query+". Their background: "+bio+". Return a JSON array with exactly 1 company object. The object must have these fields: name (string), meta (string, format: 'City · Stage · Raised · ~N people'), desc (string, one sentence), tags (array of 2 strings), fit (number 0-100), fitBreakdown (object with keys domain,technical,stage,network,experience each 0-100), opportunity (number 0-100), outreach (number 0-100), hiring (one of: active|selective|collab), visaSponsors (boolean or null), brief (object with keys Company,Domain,Stage,Raised,Team,Problem,Bet,Winning,Struggling), needs (array of 4 strings), fitReason (string, 1-2 sentences connecting user background to company problem), whyShort (string, under 15 words, the most compelling why-now signal), opportunityReason (string, 2-3 sentences), signals (array of 2-3 objects each with: type,icon,iconClass,typeClass,title,detail,impact,date — use type hiring/funding/product, icon as emoji HTML entity, iconClass as sig-hiring/sig-funding/sig-product, typeClass as type-hiring/type-funding/type-product), contact (string, best guess email like firstname@domain.com), contactConf (string: verified|public|pattern guess), li (string, linkedin.com/in/handle), x (string or null, @handle), people (array of 2-3 person objects each with: name,role,tag (tag-founder|tag-recruiter|tag-hiring),tagLabel,avColor (terra|indigo|teal),why,whyConf (high|medium|low),whyConfSource,channel (email|linkedin|x),channelLabel,li,x (or null),notes (object with keys curious and technical, each a short 2-3 sentence message),intent (array containing job and/or collab)), levelUp (array of 2 objects each with: title,weekends (number),why,capabilities (array of 3 strings),stack,outcome), email (string, full cold email), followup (string, short follow-up). Return ONLY valid JSON, no markdown, no explanation."
     :"You are Sift, an opportunity discovery engine. The user is searching the domain: "+query+". Their background: "+bio+". Return a JSON array of 3-5 company objects. Each object must have these exact fields: name,meta,desc,tags,fit,fitBreakdown,opportunity,outreach,hiring,visaSponsors,brief,needs,fitReason,whyShort,opportunityReason,signals,contact,contactConf,li,x,people,levelUp,email,followup. Use the same schema as the company mode above. Return ONLY valid JSON array, no markdown, no explanation.";
-  var resp=await fetch("https://api.anthropic.com/v1/messages",{
+  var resp=await fetch("https://api.openai.com/v1/chat/completions",{
     method:"POST",
-    headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-    body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:4000,messages:[{role:"user",content:prompt}]})
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},
+    body:JSON.stringify({model:"gpt-4o-mini",max_tokens:4000,messages:[{role:"user",content:prompt}]})
   });
   if(!resp.ok){
     var err=await resp.json().catch(function(){return{};});
@@ -1352,7 +1352,7 @@ async function siftWithAI(query,key){
     throw new Error(err.error&&err.error.message?err.error.message:"API error "+resp.status);
   }
   var data=await resp.json();
-  var text=data.content&&data.content[0]&&data.content[0].text;
+  var text=data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content;
   if(!text)return null;
   var clean=text.replace(/```json|```/g,"").trim();
   var parsed=JSON.parse(clean);
