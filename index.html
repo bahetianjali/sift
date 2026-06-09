@@ -1812,7 +1812,7 @@ function buildCommunities(data){
       }).join("");
   } else {
     el.innerHTML=data.communities.map(function(com){
-      return'<div class="research-card"><div class="research-source">'+com.type.toUpperCase()+'</div><div class="research-title">'+com.name+'</div><div class="research-relevance">'+com.why+'</div></div>';
+      return'<div class="research-card"><div class="research-source">'+((com.type||'source').toUpperCase())+'</div><div class="research-title">'+com.name+'</div><div class="research-relevance">'+com.why+'</div></div>';
     }).join("");
   }
 }
@@ -1993,7 +1993,7 @@ function toggleFitBreakdown(){
   if(scoreEl){scoreEl.querySelector(".dscore-lbl").textContent=el.classList.contains("open")?"Fit &#9650;":"Fit &#9660;";}
 }
 function buildSignals(c){
-  var feed=c.signals.map(function(s){return'<div class="signal-card"><div class="signal-icon '+s.iconClass+'">'+s.icon+'</div><div style="flex:1"><div class="signal-type '+s.typeClass+'">'+s.type.toUpperCase()+'</div><div class="signal-title">'+s.title+'</div><div class="signal-detail">'+s.detail+'</div><div class="signal-impact">'+s.impact+'</div><div class="signal-date">'+s.date+'</div></div></div>';}).join("");
+  var feed=(c.signals||[]).filter(function(s){return s&&s.title;}).map(function(s){return'<div class="signal-card"><div class="signal-icon '+(s.iconClass||'sig-product')+'">'+s.icon+'</div><div style="flex:1"><div class="signal-type '+(s.typeClass||'type-product')+'">'+((s.type||'update').toUpperCase())+'</div><div class="signal-title">'+s.title+'</div><div class="signal-detail">'+s.detail+'</div><div class="signal-impact">'+s.impact+'</div><div class="signal-date">'+s.date+'</div></div></div>';}).join("");
   document.getElementById("d-signals").innerHTML='<div class="why-now-score"><div class="why-num">'+c.opportunity+'</div><div><div class="why-label">Why Now Score</div><div class="why-desc">'+c.opportunityReason+'</div></div></div>'+feed;
 }
 function buildPeople(c){
