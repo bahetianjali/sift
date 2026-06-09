@@ -14,7 +14,7 @@
   --terra:#5F9462;--terra-soft:#E4EFE0;--terra-deep:#3D6B40;
   --indigo:#5740A8;--indigo-soft:#EDE8F8;--indigo-deep:#3D2C7E;
   --teal:#2C7A7B;--teal-soft:#D9EDED;--teal-deep:#1F5C5D;
-  --amber:#D4A03E;--amber-soft:#F8ECC9;--amber-deep:#9F761A;
+  --amber:#E8673A;--amber-soft:#FDEEE8;--amber-deep:#B84420;
   --p:#5740A8;--ps:#EDE8F8;--pd:#3D2C7E
 }
 body.theme-terra{--p:var(--terra);--ps:var(--terra-soft);--pd:var(--terra-deep);--bg:#EFF5EF}
@@ -250,7 +250,7 @@ body:not(.app-mode) .main{display:none}
 .smini{padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;line-height:1.4;color:#fff;font-family:'Fraunces',serif}
 .smini.f{background:var(--p)}
 .smini.o{background:var(--amber)}
-.smini.r{background:var(--indigo)}
+.smini.r{background:#2A8C6E}
 .cc-why{font-size:11px;color:var(--ink2);line-height:1.45;margin-bottom:6px}
 .cc-badges{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
 .badge{font-size:10px;padding:2px 6px;border-radius:6px;font-weight:600;white-space:nowrap}
@@ -281,7 +281,7 @@ body:not(.app-mode) .main{display:none}
 .dscore{padding:5px 11px;border-radius:8px;text-align:center;color:#fff;font-weight:700}
 .dscore.f{background:var(--p)}
 .dscore.o{background:var(--amber)}
-.dscore.r{background:var(--indigo)}
+.dscore.r{background:#2A8C6E}
 .dscore-num{font-family:'Fraunces',serif;font-size:16px;line-height:1}
 .dscore-lbl{font-size:8px;letter-spacing:.05em;text-transform:uppercase;margin-top:1px;opacity:.95}
 .export-btn{padding:5px 11px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:inherit}
@@ -305,7 +305,7 @@ body:not(.app-mode) .main{display:none}
 .ov-val{font-size:12px;font-weight:600;color:var(--ink)}
 .ov-val a{color:var(--terra-deep);text-decoration:none}
 
-.why-now-score{background:linear-gradient(135deg,var(--amber),var(--amber-deep));border-radius:11px;padding:14px 16px;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.why-now-score{background:linear-gradient(135deg,#E8673A,#B84420);border-radius:11px;padding:14px 16px;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:14px}
 .why-num{font-family:'Fraunces',serif;font-size:34px;font-weight:700;line-height:1}
 .why-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.9;margin-bottom:3px}
 .why-desc{font-size:13px;opacity:.95;line-height:1.55}
@@ -515,11 +515,25 @@ body:not(.app-mode) .main{display:none}
   .needs-list li{font-size:11px}
   .fb-label{width:100px;font-size:10px}
 }
+.ltext-dots::after{content:'';animation:ldots 1.2s steps(4,end) infinite}
+@keyframes ldots{0%{content:'';}25%{content:'.';}50%{content:'..';}75%{content:'...';}100%{content:''}}
+.lstep{display:flex;align-items:center;gap:12px;opacity:.35;transition:opacity .3s,transform .3s;transform:translateY(4px)}
+.dscore.f.collab{background:#5C6E3B}
+.dscore.f.network{background:#2A7A7A}
+.smini.f.collab{background:#5C6E3B}
+.smini.f.network{background:#2A7A7A}
+.signal-loading-card{height:72px;background:linear-gradient(90deg,var(--border) 25%,var(--bg) 50%,var(--border) 75%);background-size:200% 100%;border-radius:10px;animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 </style>
 </head>
 <body>
 
-<div id="loading"><div class="spinner"></div><div class="ltext" id="ltext">Sifting through the noise...</div></div>
+<div id="loading">
+  <div id="loading-inner" style="text-align:center;padding:0 32px;max-width:560px;width:100%">
+    <div id="loading-phrase" style="font-family:'Fraunces',serif;font-size:48px;font-weight:700;line-height:1.15;color:var(--ink);transition:none"></div>
+    <div id="loading-sub" style="font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:18px;opacity:0;transition:opacity .4s"></div>
+  </div>
+</div>
 
 <div class="topbar">
   <div class="logo" onclick="goHome()">Sift<span class="dot">.</span></div>
@@ -809,7 +823,7 @@ body:not(.app-mode) .main{display:none}
 <div style="text-align:center;padding:20px 24px 32px;font-size:12px;color:var(--muted);line-height:1.8">
   Built by <strong style="color:var(--ink)">Anjali Baheti</strong> — backend engineer exploring what opportunity discovery could look like.<br>
   Questions, feedback, or just want to say hi?
-  <a href="https://www.linkedin.com/in/anjalibaheti" target="_blank" style="color:var(--pd);font-weight:600;margin-left:4px">Ping me on LinkedIn &#8599;</a>
+  <a href="https://www.linkedin.com/in/bahetianjali" target="_blank" style="color:var(--pd);font-weight:600;margin-left:4px">Ping me on LinkedIn &#8599;</a>
 </div>
 
 <div class="modal-bg" id="settings-modal" onclick="if(event.target===this)closeSettings()">
@@ -900,7 +914,7 @@ body:not(.app-mode) .main{display:none}
 
 <script>
 // ── STATE ──
-var S={intent:"job",geo:"world",visa:false,sort:"fit",mode:"domain",query:"",currentCo:null,currentPeople:[],filtersOpen:false,aiResults:null,usingAI:false,profile:{name:"",bio:"",li:"",key:"",anthModel:"claude-sonnet-4-6",oaiModel:"gpt-4o"}};
+var S={intent:"job",geo:"world",visa:false,sort:"fit",mode:"domain",query:"",currentCo:null,currentPeople:[],filtersOpen:false,aiResults:null,usingAI:false,_card1Ready:false,_waitingToOpen:false,profile:{name:"",bio:"",li:"",key:"",anthModel:"claude-sonnet-4-6",oaiModel:"gpt-4o"}};
 
 // ── TRANSITION DATA ──
 var transitionData={
@@ -1433,28 +1447,206 @@ function doSearch(){
     }
     return;
   }
-  // Live API call
-  document.getElementById("loading").style.display="flex";
-  document.getElementById("ltext").textContent=S.mode==="domain"?"Sifting the "+q+" landscape...":"Researching "+q+"...";
-  siftWithAI(q,key).then(function(aiCos){
-    if(aiCos&&aiCos.length>0){
-      S.aiResults=aiCos;
-      S.usingAI=true;
-    } else {
-      S.aiResults=null;
-      S.usingAI=false;
-    }
-    document.getElementById("loading").style.display="none";
+  if(S.mode==="company"){
+    // Company research — single full call
+    document.getElementById("loading").style.display="flex";
+    document.getElementById("ltext").textContent="Researching "+q+"...";
+    siftWithAI(q,key).then(function(aiCos){
+      if(aiCos&&aiCos.length>0){S.aiResults=aiCos;S.usingAI=true;}
+      else{S.aiResults=null;S.usingAI=false;}
+      document.getElementById("loading").style.display="none";
       enterAppMode(false);buildResults();
-      if(S.mode==="company"&&S.usingAI&&S.aiResults&&S.aiResults.length>0)openCompany(0);
-      else if(S.mode==="company"&&demoMatch.length>0)openCompany(companies.indexOf(demoMatch[0]));
-  }).catch(function(err){
-    console.error("AI search failed:",err);
-    S.aiResults=null;S.usingAI=false;
-    document.getElementById("loading").style.display="none";
-    var msg=err&&err.message?err.message:"Search failed. Check your API key in Settings.";
-    showToast(msg);
-  });
+      if(S.usingAI&&S.aiResults&&S.aiResults.length>0)openCompany(0);
+      else if(demoMatch.length>0)openCompany(companies.indexOf(demoMatch[0]));
+    }).catch(function(err){
+      document.getElementById("loading").style.display="none";
+      showToast(err&&err.message?err.message:"Search failed. Check your API key in Settings.");
+    });
+  } else {
+    // Domain search — progressive: fetch one card at a time, render each as it arrives
+    S.aiResults=[];
+    S.usingAI=true;
+    enterAppMode(false);
+    buildResults(); // show empty state immediately
+    doProgressiveSearch(q,key,0,5);
+  }
+}
+function showLoadingPhrases(intent,onDone){
+  var founderPhrases=[
+    "The [signal] is in the noise.",
+    "Reading your builder [DNA].",
+    "Who is building [adjacent] to you?",
+    "Finding the five founders worth [knowing].",
+    "Mapping your next [collaboration]."
+  ];
+  var climberPhrases=[
+    "Not the job board. The [signal].",
+    "Your background is a [filter].",
+    "Matching problems, not [titles].",
+    "Finding where you would actually [thrive].",
+    "Building your opportunity [brief]."
+  ];
+  var connectorPhrases=[
+    "Every transition has a [pattern].",
+    "Reading the moves [others] made.",
+    "Who crossed this bridge [before] you?",
+    "Mapping the [30-day] arc.",
+    "Charting the [path] across."
+  ];
+  var phrases={collab:founderPhrases,job:climberPhrases,network:connectorPhrases}[intent]||climberPhrases;
+  var phraseEl=document.getElementById("loading-phrase");
+  var subEl=document.getElementById("loading-sub");
+  var subTexts={collab:"The Founder",job:"The Climber",network:"The Connector"};
+  if(subEl){subEl.textContent=subTexts[intent]||"";setTimeout(function(){subEl.style.opacity="1";},300);}
+  var stopped=false;
+  var i=0;
+  var accentColor={collab:"#5C6E3B",job:"var(--p)",network:"#2A7A7A"}[intent]||"var(--p)";
+  function renderWords(text){
+    var words=text.split(" ");
+    phraseEl.innerHTML=words.map(function(w,wi){
+      // Strip trailing punctuation to detect [word]. or [word]?
+      var trailing=w.match(/[.,!?]+$/)?w.match(/[.,!?]+$/)[0]:"";
+      var core=trailing?w.slice(0,-trailing.length):w;
+      var isHighlight=core.startsWith("[")&&core.endsWith("]");
+      var word=isHighlight?core.slice(1,-1):core;
+      var extra=isHighlight?';color:'+accentColor+';font-style:italic;font-weight:800':'';
+      return'<span class="lword" style="display:inline-block;opacity:0;transform:translateY(18px);transition:opacity .35s ease '+(wi*0.08)+'s,transform .4s cubic-bezier(.22,1,.36,1) '+(wi*0.08)+'s;margin-right:.25em'+extra+'">'+(word+trailing)+'</span>';
+    }).join("");
+    setTimeout(function(){
+      phraseEl.querySelectorAll(".lword").forEach(function(span){
+        span.style.opacity="1";
+        span.style.transform="translateY(0)";
+      });
+    },30);
+  }
+  function flipOut(cb){
+    var spans=phraseEl.querySelectorAll(".lword");
+    var delay=spans.length>0?320+spans.length*40:400;
+    spans.forEach(function(span,wi){
+      span.style.transition="opacity .25s ease "+(wi*0.04)+"s,transform .3s ease "+(wi*0.04)+"s";
+      span.style.opacity="0";
+      span.style.transform="translateY(-16px)";
+    });
+    // Always fire callback via setTimeout regardless of CSS transition
+    setTimeout(function(){cb();},delay);
+  }
+  function showNext(){
+    if(stopped||!phraseEl)return;
+    if(i===0){
+      renderWords(phrases[i]);
+      i++;
+      setTimeout(showNext,3200);
+    } else {
+      flipOut(function(){
+        if(i>=phrases.length){
+          // All phrases done — now reveal card 1
+          var loadEl=document.getElementById("loading");
+          if(loadEl)loadEl.style.display="none";
+          // Connector mode
+          if(S.intent==="network"&&S._connFrom){
+            _openConnectorWithResult(S._connTransitionResult,S._connFrom,S._connTo);
+            if(onDone)onDone();
+            return;
+          }
+          // Company/domain mode
+          if(S._card1Ready&&S.aiResults&&S.aiResults.length>0){
+            openCompany(0);
+          } else {
+            var phr=document.getElementById("loading-phrase");
+            if(phr)phr.innerHTML='<span style="font-family:Fraunces,serif;font-size:36px;font-weight:700;color:var(--ink)">Almost there...</span>';
+            S._waitingToOpen=true;
+          }
+          if(onDone)onDone();
+          return;
+        }
+        if(stopped)return;
+        renderWords(phrases[i]);
+        i++;
+        setTimeout(showNext,3200);
+      });
+    }
+  }
+  showNext();
+  return {stop:function(){stopped=true;}};
+}
+async function doProgressiveSearch(q,key,idx,total){
+  if(idx>=total){
+    var ind=document.getElementById("progress-indicator");
+    if(ind)ind.style.display="none";
+    return;
+  }
+  var loadEl=document.getElementById("loading");
+  if(idx===0){
+    if(loadEl)loadEl.style.display="flex";
+    var lsub=document.getElementById("lsub");
+    if(lsub)lsub.textContent="Personalizing for "+({collab:"The Founder",job:"The Climber",network:"The Connector"}[S.intent]||"you")+"...";
+    
+    S._stepAnim=showLoadingPhrases(S.intent,null);
+  }
+  updateProgressIndicator(idx,total);
+  try{
+    var card=await fetchOneCard(q,key,idx,total);
+    if(card){
+      S.aiResults.push(card);
+      buildResults();
+      if(idx===0){
+        if(S._stepAnim)S._stepAnim.stop();
+        
+        setTimeout(function(){
+          if(loadEl)loadEl.style.display="none";
+          openCompany(0);
+          if(S.aiResults[0]){
+            fetchCompanyDetail(S.aiResults[0]);
+            if(S.intent==="collab"){setTimeout(function(){prefetchFounderTabs(S.aiResults[0],key);},1000);}
+          }
+        },400);
+      }
+      if(idx>0){
+        var fc=card;var fi=idx;
+        setTimeout(function(){
+          fetchCompanyDetail(fc);
+          if(S.intent==="collab"){setTimeout(function(){prefetchFounderTabs(fc,key);},2000);}
+        },fi*1200);
+      }
+    }
+    updateProgressIndicator(idx+1,total);
+    doProgressiveSearch(q,key,idx+1,total);
+  }catch(e){
+    console.error("Card "+idx+" failed:",e);
+    if(idx===0){
+      if(S._stepAnim)S._stepAnim.stop();
+      if(loadEl)loadEl.style.display="none";
+      showToast("Search failed: "+(e.message||"Check your API key"));
+    }
+    if(idx<total-1)doProgressiveSearch(q,key,idx+1,total);
+  }
+}
+function updateProgressIndicator(done,total){
+  var ind=document.getElementById("progress-indicator");
+  if(!ind){
+    ind=document.createElement("div");
+    ind.id="progress-indicator";
+    ind.style.cssText="padding:8px 14px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border)";
+    var lpane=document.getElementById("lpane-body")||document.querySelector(".lpane-body");
+    if(lpane)lpane.appendChild(ind);
+  }
+  if(done>=total){ind.style.display="none";return;}
+  ind.style.display="flex";
+  ind.innerHTML='<div style="width:12px;height:12px;border:2px solid var(--p);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0"></div><span>Finding company '+(done+1)+' of '+total+'...</span>';
+}
+async function fetchOneCard(q,key,idx,total){
+  var bio=S.profile.bio||"Backend engineer";
+  var intentLabel={"collab":"founder looking for collaborators","job":"climber looking for their next role","network":"connector mapping transitions"}[S.intent]||"professional";
+  var avoidNames=S.aiResults.map(function(c){return c.name;}).join(", ");
+  var avoidClause=avoidNames?"Do NOT return any of these already-found companies: "+avoidNames+". ":"";
+  var prompt='You are Sift. Return ONLY a JSON object (not array), no markdown. '+avoidClause+'Find company number '+(idx+1)+' of '+total+' in this domain: '+q+'. The user is a '+intentLabel+'. User background: '+bio+'. Return this exact structure: {"name":"Company Name","meta":"City · Stage · $XM raised · ~N people","desc":"One sentence on what they build.","tags":["Tag1","Tag2"],"fit":85,"fitBreakdown":{"domain":88,"technical":90,"stage":80,"network":70,"experience":85},"opportunity":78,"outreach":72,"hiring":"active","visaSponsors":true,"fitReason":"1-2 sentences why this fits the user specifically.","whyShort":"Under 15 words why now.","brief":{"Company":"Name","Domain":"domain.com","Stage":"Series B","Raised":"$40M","Team":"~80","Problem":"Core problem","Bet":"Market bet","Winning":"Current advantage","Struggling":"Current bottleneck"},"needs":["Need 1","Need 2","Need 3","Need 4"]}';
+  var text=await siftAICall(prompt,key);
+  if(!text)return null;
+  var clean=text.split("```json").join("").split("```").join("").trim();
+  // Handle if AI returned array instead of object
+  if(clean[0]==="[")clean=clean.slice(1,clean.lastIndexOf("]")+1).trim();
+  var obj=JSON.parse(clean);
+  return normalizeCompany(Array.isArray(obj)?obj[0]:obj);
 }
 function updateFreeUsage(userRemaining,globalRemaining){
   var el=document.getElementById("free-usage");
@@ -1692,6 +1884,43 @@ async function siftWithAI(query,key){
     throw new Error("The AI returned invalid data. Try searching again.");
   }
 }
+function _openConnectorWithResult(result,from,to){
+  enterAppMode(true);
+  buildConnectorResults(from,to);
+  var td=null;
+  if(result){
+    try{
+      td=JSON.parse(result.split("```json").join("").split("```").join("").trim());
+    }catch(e){console.error("Transition parse:",e);}
+  }
+  // If no AI result, use a static example so tabs are never blank
+  if(!td){
+    td={
+      readiness:65,
+      skillGaps:[
+        {skill:"Add your API key for personalized skill gaps",gap:"high",action:"Go to Settings and add your Anthropic or OpenAI key to get AI-generated results for this transition.",timeWeeks:0}
+      ],
+      thirtyDayPlan:[
+        {week:1,action:"Add your API key in Settings to generate a personalized 30-day plan",outcome:"Your transition from "+from+" to "+to+" will be mapped specifically to your background"}
+      ],
+      projects:[
+        {title:"Add your API key to generate proof projects",weekends:2,why:"Projects are tailored to demonstrate the exact skills needed for the "+to+" role based on your background as a "+from+".",outcome:"Personalized to your profile"}
+      ],
+      peopleLikeYou:[
+        {path:from+" → "+to,time:"Varies",firstRole:"First "+to+" role"}
+      ],
+      communities:["Add your API key in Settings to see communities relevant to the "+from+" → "+to+" transition"]
+    };
+  }
+  S.currentTransition=td;
+  renderTransitionTab("all",td);
+  if(td.readiness){
+    var scoreEl=document.querySelector(".smini.f");
+    if(scoreEl)scoreEl.textContent=td.readiness;
+    var dcmeta=document.getElementById("dcmeta");
+    if(dcmeta)dcmeta.textContent="Career transition · Readiness: "+td.readiness+"%";
+  }
+}
 function doConnectorSearch(){
   var from=document.getElementById("conn-from");
   var to=document.getElementById("conn-to");
@@ -1701,9 +1930,54 @@ function doConnectorSearch(){
   var key=nFrom+"→"+nTo;
   S.query=key;
   document.getElementById("sq").value=key;
-  document.getElementById("loading").style.display="flex";
-  document.getElementById("ltext").textContent="Mapping your transition...";
-  setTimeout(function(){document.getElementById("loading").style.display="none";enterAppMode(true);buildConnectorResults(nFrom,nTo);},1400);
+  var userKey=S.profile.key;
+  // Set these immediately so phrases can find them when they complete
+  S._connFrom=nFrom;
+  S._connTo=nTo;
+  S._connTransitionResult=null;
+  S._card1Ready=false;
+  S._waitingToOpen=false;
+  var loadEl=document.getElementById("loading");
+  if(loadEl)loadEl.style.display="flex";
+  // Show connector phrases — they will call _openConnectorWithResult when done
+  S._stepAnim=showLoadingPhrases("network",null);
+  if(!userKey){
+    // No key — static fallback, phrases will open it when done
+    return;
+  }
+  // Live AI call
+  var bio=S.profile.bio||"Backend engineer";
+  var tprompt='You are Sift. Return ONLY a JSON object, no markdown. Map a career transition from "'+nFrom+'" to "'+nTo+'" for someone with this background: '+bio+'. Return: {"readiness":65,"skillGaps":[{"skill":"Skill name","gap":"high|medium|low","action":"Specific action to close this gap","timeWeeks":4}],"thirtyDayPlan":[{"week":1,"action":"Specific action","outcome":"What this proves"}],"projects":[{"title":"Project title","weekends":2,"why":"Why this matters for the transition","outcome":"What it demonstrates"}],"peopleLikeYou":[{"path":"Their transition path","time":"How long it took","firstRole":"Their first role"}],"communities":["Community name and why it matters"]}. Include 3-4 items per array. Return only the JSON object.';
+  siftAICall(tprompt,userKey).then(function(result){
+    // Don't stop phrases — let them finish naturally, just store result
+    S._connTransitionResult=result;
+    S._connFrom=nFrom;S._connTo=nTo;
+    // If phrases already done (stopped naturally), open now
+    if(!document.getElementById("loading")||document.getElementById("loading").style.display==="none"){
+      _openConnectorWithResult(result,nFrom,nTo);
+    }
+    // Otherwise phrases will call _openConnectorWithResult when done
+  }).catch(function(e){
+    enterAppMode(true);
+    buildConnectorResults(nFrom,nTo);
+    if(result){
+      try{
+        var td=JSON.parse(result.split("```json").join("").split("```").join("").trim());
+        S.currentTransition=td;
+        renderTransitionTab("all",td);
+        // Update readiness score in card
+        if(td.readiness){
+          var scoreEl=document.querySelector(".smini.f");
+          if(scoreEl)scoreEl.textContent=td.readiness;
+          document.getElementById("dcmeta").textContent="Career transition · Readiness: "+td.readiness+"%";
+        }
+      }catch(e){console.error("Transition parse error:",e);}
+    }
+  }).catch(function(e){
+    S._connTransitionResult=null;
+    S._connFrom=nFrom;S._connTo=nTo;
+    showToast("Could not generate transition data: "+(e.message||"Check your API key"));
+  });
 }
 function buildConnectorResults(from,to){
   var data=findTransitionData(from,to);
@@ -1967,6 +2241,58 @@ function buildResults(){
 }
 function switchLtab(t){document.getElementById("ltab-cos").classList.toggle("on",t==="cos");document.getElementById("ltab-research").classList.toggle("on",t==="research");document.getElementById("lpane-body-cos").style.display=t==="cos"?"block":"none";document.getElementById("lpane-body-research").style.display=t==="research"?"block":"none";document.getElementById("lpane-header-cos").style.display=t==="cos"?"flex":"none";}
 
+function renderCompMap(el,d,companyName){
+  var html='<div>';
+  if(d.whitespace)html+='<div style="background:var(--ps);border-left:3px solid var(--p);padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--ink)">&#128269; '+d.whitespace+'</div>';
+  (d.competitors||[]).forEach(function(co){html+='<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px"><div style="font-weight:700;font-size:13px;color:var(--ink);margin-bottom:4px">'+co.name+'</div><div style="font-size:12px;color:var(--ink2);margin-bottom:4px">'+co.position+'</div><div style="font-size:11px;color:var(--muted)">vs '+(companyName||"them")+': '+co.differentFrom+'</div></div>';});
+  if(d.takeaway)html+='<div style="font-size:12px;color:var(--pd);font-weight:600;padding:10px 0">&#127919; '+d.takeaway+'</div>';
+  html+='</div>';
+  el.innerHTML=html;
+}
+function renderFunding(el,d){
+  var html='<div>';
+  html+='<div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap">';
+  if(d.totalRaised)html+='<div style="background:var(--ps);border-radius:8px;padding:10px 14px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Total Raised</div><div style="font-size:18px;font-weight:700;color:var(--pd)">'+d.totalRaised+'</div></div>';
+  if(d.lastValuation&&d.lastValuation!=="unknown")html+='<div style="background:var(--ps);border-radius:8px;padding:10px 14px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Last Valuation</div><div style="font-size:18px;font-weight:700;color:var(--pd)">'+d.lastValuation+'</div></div>';
+  html+='</div>';
+  (d.rounds||[]).slice().reverse().forEach(function(r){html+='<div style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start"><div style="flex-shrink:0;text-align:center;min-width:60px"><div style="font-weight:700;font-size:13px;color:var(--pd)">'+r.round+'</div><div style="font-size:11px;color:var(--muted)">'+r.date+'</div></div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--ink)">'+r.amount+'</div><div style="font-size:11px;color:var(--ink2)">Lead: '+r.lead+'</div>'+(r.note?'<div style="font-size:11px;color:var(--muted);margin-top:3px">'+r.note+'</div>':'')+'</div></div>';});
+  if(d.notableInvestors&&d.notableInvestors.length)html+='<div style="margin-top:12px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px">Notable Investors</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+d.notableInvestors.map(function(i){return'<span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--ink2)">'+i+'</span>';}).join("")+'</div></div>';
+  if(d.founderNote)html+='<div style="margin-top:14px;font-size:12px;color:var(--pd);font-weight:600;border-top:1px solid var(--border);padding-top:10px">&#128161; '+d.founderNote+'</div>';
+  html+='</div>';
+  el.innerHTML=html;
+}
+async function prefetchFounderTabs(c,key){
+  if(c._founderTabsFetched||c._founderTabsFetching)return;
+  c._founderTabsFetching=true;
+  try{
+    // Fetch both comp map and funding in parallel
+    var domain=c.brief&&c.brief.Domain?c.brief.Domain:c.name;
+    var compPrompt='Return ONLY a JSON object, no markdown. For company "'+c.name+'" ('+domain+'): {"competitors":[{"name":"Name","position":"1-2 sentences","differentFrom":"How they differ","opportunity":"Why it matters for user"}],"whitespace":"1-2 sentences on market gaps","takeaway":"1 sentence strategic takeaway"}. Include 3-4 competitors.';
+    var fundPrompt='Return ONLY a JSON object, no markdown. For company "'+c.name+'" ('+domain+'): {"rounds":[{"round":"Name","amount":"$XM","date":"Month Year","lead":"Lead investor","note":"1 sentence"}],"totalRaised":"$XM","lastValuation":"$XM or unknown","notableInvestors":["Investor 1","Investor 2","Investor 3"],"burnNote":"1 sentence","founderNote":"1 sentence on what funding signals for collaborators"}';
+    var results=await Promise.all([
+      siftAICall(compPrompt,key).catch(function(){return null;}),
+      siftAICall(fundPrompt,key).catch(function(){return null;})
+    ]);
+    if(results[0]){
+      try{c._compMap=JSON.parse(results[0].split("```json").join("").split("```").join("").trim());}catch(e){}
+    }
+    if(results[1]){
+      try{c._funding=JSON.parse(results[1].split("```json").join("").split("```").join("").trim());}catch(e){}
+    }
+    c._founderTabsFetched=true;
+    c._founderTabsFetching=false;
+    // If this company is currently open, re-render those tabs
+    if(S.currentCo&&S.currentCo.name===c.name){
+      var compEl=document.getElementById("d-comp");
+      var fundEl=document.getElementById("d-fund");
+      if(compEl&&c._compMap)renderCompMap(compEl,c._compMap,c.name);
+      if(fundEl&&c._funding)renderFunding(fundEl,c._funding);
+    }
+  }catch(e){
+    c._founderTabsFetching=false;
+    console.error("prefetchFounderTabs error:",e);
+  }
+}
 async function siftAICall(prompt,key){
   try{
     var isOpenAI=key&&key.startsWith("sk-")&&!key.startsWith("sk-ant-");
@@ -2052,6 +2378,10 @@ async function fetchCompanyDetail(c){
       buildPeople(c);
       buildSignals(c);
       if(S.intent==="job")buildLevelUp(c);
+    }
+    // For Founder: pre-fetch competitive map and funding in background
+    if(S.intent==="collab"&&key){
+      setTimeout(function(){prefetchFounderTabs(c,key);},200);
     }
   }catch(e){
     c._detailFetching=false;
@@ -2168,7 +2498,7 @@ function openCompany(idx){
   S.currentCo=c;
   document.getElementById("dcname").textContent=c.name;
   document.getElementById("dcmeta").textContent=(c.meta||"").split("\n").join(" · ").split("\r").join("").split("\\n").join(" · ").replace(/ · {2,}/g," · ").trim();
-  document.getElementById("dscores").innerHTML='<div class="dscore f" onclick="toggleFitBreakdown()" style="cursor:pointer" title="See breakdown"><div class="dscore-num">'+c.fit+'</div><div class="dscore-lbl">Fit &#9660;</div></div><div class="dscore o"><div class="dscore-num">'+c.opportunity+'</div><div class="dscore-lbl">Why Now</div></div><div class="dscore r"><div class="dscore-num">'+c.outreach+'</div><div class="dscore-lbl">Reach</div></div>';
+  document.getElementById("dscores").innerHTML='<div class="dscore f '+S.intent+'" onclick="toggleFitBreakdown()" style="cursor:pointer" title="See breakdown"><div class="dscore-num">'+c.fit+'</div><div class="dscore-lbl">Fit &#9660;</div></div><div class="dscore o"><div class="dscore-num">'+c.opportunity+'</div><div class="dscore-lbl">Why Now</div></div><div class="dscore r"><div class="dscore-num">'+c.outreach+'</div><div class="dscore-lbl">Reach</div></div>';
   // Build persona-appropriate tabs
   var tabCfg={
     collab:[
@@ -2275,8 +2605,13 @@ function toggleFitBreakdown(){
   if(scoreEl){scoreEl.querySelector(".dscore-lbl").textContent=el.classList.contains("open")?"Fit &#9650;":"Fit &#9660;";}
 }
 function buildSignals(c){
-  var feed=(Array.isArray(c.signals)?c.signals:[]).filter(function(s){return s&&s.title;}).map(function(s){return'<div class="signal-card"><div class="signal-icon '+(s.iconClass||'sig-product')+'">'+s.icon+'</div><div style="flex:1"><div class="signal-type '+(s.typeClass||'type-product')+'">'+((s.type||'update').toUpperCase())+'</div><div class="signal-title">'+s.title+'</div><div class="signal-detail">'+s.detail+'</div><div class="signal-impact">'+s.impact+'</div><div class="signal-date">'+s.date+'</div></div></div>';}).join("");
-  var oppReason=c.opportunityReason||c.whyShort||"";document.getElementById("d-signals").innerHTML='<div class="why-now-score"><div class="why-num">'+c.opportunity+'</div><div><div class="why-label">Why Now Score</div><div class="why-desc">'+oppReason+'</div></div></div>'+feed;
+  var signals=Array.isArray(c.signals)?c.signals.filter(function(s){return s&&s.title;}):[];
+  var feed=signals.map(function(s){return'<div class="signal-card"><div class="signal-icon '+(s.iconClass||'sig-product')+'">'+s.icon+'</div><div style="flex:1"><div class="signal-type '+(s.typeClass||'type-product')+'">'+((s.type||'update').toUpperCase())+'</div><div class="signal-title">'+s.title+'</div><div class="signal-detail">'+s.detail+'</div><div class="signal-impact">'+s.impact+'</div><div class="signal-date">'+s.date+'</div></div></div>';}).join("");
+  var oppReason=c.opportunityReason||c.whyShort||"";
+  var loadingSignals=signals.length===0?'<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px"><div class="signal-loading-card"></div><div class="signal-loading-card" style="opacity:.6"></div><div class="signal-loading-card" style="opacity:.35"></div></div>':"";
+  document.getElementById("d-signals").innerHTML='<div class="why-now-score"><div class="why-num">'+c.opportunity+'</div><div><div class="why-label">Why Now Score</div><div class="why-desc">'+oppReason+'</div></div></div>'+feed+loadingSignals;
+  // If no signals yet — fetch detail
+  if(signals.length===0)fetchCompanyDetail(c);
 }
 function buildPeople(c){if(!c.people||!c.people.length){
     document.getElementById("d-people").innerHTML='<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px"><div style="font-size:20px;margin-bottom:10px">&#128101;</div>Loading people...</div>';
@@ -2432,19 +2767,17 @@ function buildCompetitive(c){
   if(!ext){
     var key=S.profile.key;
     if(!key){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Add your API key in Settings to generate a competitive map.</div>';return;}
-    el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Generating competitive map...</div>';
+    // Check if already prefetched
+    if(c._compMap){renderCompMap(el,c._compMap,c.name);return;}
+    el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px"><div style="display:flex;align-items:center;gap:8px"><div style="width:14px;height:14px;border:2px solid var(--p);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite"></div>Generating competitive map...</div></div>';
     var bio=S.profile.bio||"Backend engineer";
     var cprompt='Return ONLY a JSON object, no markdown. For the company "'+c.name+'" in context of user background: '+bio+'. Return: {"competitors":[{"name":"Company name","position":"1-2 sentences on their position","differentFrom":"How they differ from '+c.name+'","opportunity":"Why this matters for the user"}],"whitespace":"1-2 sentences on gaps in the market","takeaway":"1 sentence strategic takeaway for the user"}. Include 3-4 competitors.';
     siftAICall(cprompt,key).then(function(result){
       if(!result){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Could not generate competitive map. Try again.</div>';return;}
       try{
         var d=JSON.parse(result.split("```json").join("").split("```").join("").trim());
-        var html='<div style="padding:0">';
-        if(d.whitespace)html+='<div style="background:var(--ps);border-left:3px solid var(--p);padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--ink)">&#128269; '+d.whitespace+'</div>';
-        (d.competitors||[]).forEach(function(co){html+='<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px"><div style="font-weight:700;font-size:13px;color:var(--ink);margin-bottom:4px">'+co.name+'</div><div style="font-size:12px;color:var(--ink2);margin-bottom:4px">'+co.position+'</div><div style="font-size:11px;color:var(--muted)">vs '+c.name+': '+co.differentFrom+'</div></div>';});
-        if(d.takeaway)html+='<div style="font-size:12px;color:var(--pd);font-weight:600;padding:10px 0">&#127919; '+d.takeaway+'</div>';
-        html+='</div>';
-        el.innerHTML=html;
+        c._compMap=d;
+        renderCompMap(el,d,c.name);
       }catch(e){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Could not parse competitive map. Try again.</div>';}
     }).catch(function(){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Could not generate competitive map. Try again.</div>';});
     return;
@@ -2471,7 +2804,9 @@ function buildFunding(c){
   if(!ext){
     var key=S.profile.key;
     if(!key){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Add your API key in Settings to generate funding data.</div>';return;}
-    el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Fetching funding data...</div>';
+    // Check if already prefetched
+    if(c._funding){renderFunding(el,c._funding);return;}
+    el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px"><div style="display:flex;align-items:center;gap:8px"><div style="width:14px;height:14px;border:2px solid var(--p);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite"></div>Fetching funding data...</div></div>';
     var bio=S.profile.bio||"Backend engineer";
     var fprompt='Return ONLY a JSON object, no markdown. For the company "'+c.name+'". Return: {"rounds":[{"round":"Series name e.g. Seed","amount":"$XM","date":"Month Year","lead":"Lead investor name","note":"1 sentence on what this round enabled"}],"totalRaised":"$XM total","lastValuation":"$XM or unknown","notableInvestors":["Investor 1","Investor 2","Investor 3"],"burnNote":"1 sentence estimate on runway/burn stage","founderNote":"1 sentence on what the funding trajectory signals for someone wanting to join"}. Include all known rounds.';
     siftAICall(fprompt,key).then(function(result){
