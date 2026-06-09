@@ -1916,7 +1916,7 @@ function openCompany(idx){
   if(c.tags&&!Array.isArray(c.tags))c.tags=[c.tags];
   S.currentCo=c;
   document.getElementById("dcname").textContent=c.name;
-  document.getElementById("dcmeta").textContent=c.meta;
+  document.getElementById("dcmeta").textContent=(c.meta||"").split("\n").join(" · ").split("\r").join("").split("\\n").join(" · ").replace(/ · {2,}/g," · ").trim();
   document.getElementById("dscores").innerHTML='<div class="dscore f" onclick="toggleFitBreakdown()" style="cursor:pointer" title="See breakdown"><div class="dscore-num">'+c.fit+'</div><div class="dscore-lbl">Fit &#9660;</div></div><div class="dscore o"><div class="dscore-num">'+c.opportunity+'</div><div class="dscore-lbl">Why Now</div></div><div class="dscore r"><div class="dscore-num">'+c.outreach+'</div><div class="dscore-lbl">Reach</div></div>';
   // Build persona-appropriate tabs
   var tabCfg={
@@ -2067,7 +2067,7 @@ function buildLevelUp(c){
   }
   return'<div class="project-card"><div class="project-header"><div class="project-num">'+(i+1)+'</div><div class="project-title">'+p.title+'</div><div class="project-weekend">'+p.weekends+' weekend'+(p.weekends>1?"s":"")+'</div></div><div class="project-why">'+p.why+'</div>'+capsHtml+'<div class="project-meta"><div class="pm-item"><div class="pm-label">Stack</div><div class="pm-val">'+p.stack+'</div></div><div class="pm-item"><div class="pm-label">Effort</div><div class="pm-val">'+p.weekends+' weekend'+(p.weekends>1?"s":"")+'</div></div></div><div class="project-outcome">'+p.outcome+'</div></div>';
 }).join("");
-  document.getElementById("d-levelup").innerHTML=intro+projs;
+  document.getElementById("d-levelup").innerHTML=intro+(projs||'<div style="color:var(--muted);font-size:13px;padding:12px 0">No Level Up projects returned for this company. Try searching again.</div>');
 }
 
 function switchMsgStyle(btn){
