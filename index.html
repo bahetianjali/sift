@@ -1571,8 +1571,8 @@ async function siftWithAI(query,key){
   var isCompany=S.mode==="company";
   var bio=S.profile.bio||"Backend engineer, 4 years experience in data pipelines and AI integrations.";
   var prompt=isCompany
-    ?"You are Sift, an opportunity discovery engine. The user is researching the company: "+query+". Their background: "+bio+". Return a JSON array with exactly 1 company object. The object must have these fields: name (string), meta (string, format: 'City · Stage · Raised · ~N people'), desc (string, one sentence), tags (array of 2 strings), fit (number 0-100), fitBreakdown (object with keys domain,technical,stage,network,experience each 0-100), opportunity (number 0-100), outreach (number 0-100), hiring (one of: active|selective|collab), visaSponsors (boolean or null), brief (object with keys Company,Domain,Stage,Raised,Team,Problem,Bet,Winning,Struggling), needs (array of 4 strings), fitReason (string, 1-2 sentences connecting user background to company problem), whyShort (string, under 15 words, the most compelling why-now signal), opportunityReason (string, 2-3 sentences), signals (array of 2-3 objects each with: type,icon,iconClass,typeClass,title,detail,impact,date — use type hiring/funding/product, icon as emoji HTML entity, iconClass as sig-hiring/sig-funding/sig-product, typeClass as type-hiring/type-funding/type-product), contact (string, best guess email like firstname@domain.com), contactConf (string: verified|public|pattern guess), li (string, linkedin.com/in/handle), x (string or null, @handle), people (array of 2-3 person objects each with: name,role,tag (tag-founder|tag-recruiter|tag-hiring),tagLabel,avColor (terra|indigo|teal),why,whyConf (high|medium|low),whyConfSource,channel (email|linkedin|x),channelLabel,li,x (or null),notes (object with keys curious and technical, each a short 2-3 sentence message),intent (array containing job and/or collab)), levelUp (array of 2 objects each with: title,weekends (number),why,capabilities (array of 3 strings),stack,outcome), email (string, full cold email), followup (string, short follow-up). Return ONLY valid JSON, no markdown, no explanation."
-    :"You are Sift, an opportunity discovery engine. The user is searching the domain: "+query+". Their background: "+bio+". Return a JSON array of 3-5 company objects. Each object must have these exact fields: name,meta,desc,tags,fit,fitBreakdown,opportunity,outreach,hiring,visaSponsors,brief,needs,fitReason,whyShort,opportunityReason,signals,contact,contactConf,li,x,people,levelUp,email,followup. Use the same schema as the company mode above. Return ONLY valid JSON array, no markdown, no explanation.";
+    ?('You are Sift. Return ONLY a JSON array containing exactly 1 object. No markdown, no explanation, no text before or after. Use this EXACT structure:\n[{"name":"'+query+'","meta":"City · Stage · $XM raised · ~N people","desc":"One sentence about what they build.","tags":["tag1","tag2"],"fit":85,"fitBreakdown":{"domain":90,"technical":88,"stage":80,"network":70,"experience":85},"opportunity":80,"outreach":75,"hiring":"active","visaSponsors":true,"brief":{"Company":"Name","Domain":"domain.com","Stage":"Series B","Raised":"$50M","Team":"~100","Problem":"Core problem they solve","Bet":"What they are betting on","Winning":"Why they are winning","Struggling":"Where they are struggling"},"needs":["Need 1","Need 2","Need 3","Need 4"],"fitReason":"1-2 sentences on why user background fits.","whyShort":"Under 15 words why now.","opportunityReason":"2-3 sentences on the opportunity.","signals":[{"type":"hiring","icon":"&#128101;","iconClass":"sig-hiring","typeClass":"type-hiring","title":"Signal title","detail":"Signal detail","impact":"Why this matters","date":"Q1 2026"}],"contact":"firstname@domain.com","contactConf":"pattern guess","li":"linkedin.com/in/handle","x":"@handle","people":[{"name":"Full Name","role":"CEO, Co-founder","tag":"tag-founder","tagLabel":"Founder","avColor":"terra","why":"Why reach out to them","whyConf":"high","whyConfSource":"Publicly identified founder","channel":"email","channelLabel":"Email","li":"linkedin.com/in/handle","x":"@handle","notes":{"curious":"2-3 sentence curious message","technical":"2-3 sentence technical message"},"intent":["collab","job"]}],"levelUp":[{"title":"Project title","weekends":2,"why":"Why this project matters for this company","capabilities":["Capability 1","Capability 2","Capability 3"],"stack":"Tools to use","outcome":"What fit score improvement to expect"}],"email":"Full cold email text","followup":"Short 2 sentence followup"}]\n\nUser background: '+bio+'. Research: '+query)
+    :('You are Sift. Return ONLY a JSON array of exactly 3 objects. No markdown, no explanation. Each object must follow this exact structure with ALL fields present:\n{"name":"string","meta":"City · Stage · $XM · ~N people","desc":"one sentence","tags":["tag1","tag2"],"fit":85,"fitBreakdown":{"domain":85,"technical":85,"stage":85,"network":85,"experience":85},"opportunity":80,"outreach":75,"hiring":"active","visaSponsors":true,"brief":{"Company":"","Domain":"","Stage":"","Raised":"","Team":"","Problem":"","Bet":"","Winning":"","Struggling":""},"needs":["","","",""],"fitReason":"","whyShort":"","opportunityReason":"","signals":[{"type":"hiring","icon":"&#128101;","iconClass":"sig-hiring","typeClass":"type-hiring","title":"","detail":"","impact":"","date":""}],"contact":"","contactConf":"pattern guess","li":"","x":null,"people":[{"name":"Full Name","role":"","tag":"tag-founder","tagLabel":"Founder","avColor":"terra","why":"","whyConf":"medium","whyConfSource":"","channel":"email","channelLabel":"Email","li":"","x":null,"notes":{"curious":"","technical":""},"intent":["job","collab"]}],"levelUp":[{"title":"","weekends":2,"why":"","capabilities":["","",""],"stack":"","outcome":""}],"email":"","followup":""}\n\nUser background: '+bio+'. Domain to search: '+query);
   // Replace YOUR-PROJECT with your Vercel URL after deploying
   var VERCEL_URL="https://YOUR-PROJECT.vercel.app";
   var resp,data,text;
@@ -1894,6 +1894,75 @@ function buildResults(){
 }
 function switchLtab(t){document.getElementById("ltab-cos").classList.toggle("on",t==="cos");document.getElementById("ltab-research").classList.toggle("on",t==="research");document.getElementById("lpane-body-cos").style.display=t==="cos"?"block":"none";document.getElementById("lpane-body-research").style.display=t==="research"?"block":"none";document.getElementById("lpane-header-cos").style.display=t==="cos"?"flex":"none";}
 
+function normalizeCompany(c){
+  if(!c)return c;
+  // Strings
+  c.name=typeof c.name==="string"?c.name.trim():"Unknown Company";
+  c.desc=typeof c.desc==="string"?c.desc.trim():"";
+  c.fitReason=typeof c.fitReason==="string"?c.fitReason.trim():"";
+  c.whyShort=typeof c.whyShort==="string"?c.whyShort.trim():"";
+  c.opportunityReason=typeof c.opportunityReason==="string"?c.opportunityReason.trim():"";
+  c.email=typeof c.email==="string"?c.email.trim():"";
+  c.followup=typeof c.followup==="string"?c.followup.trim():"";
+  c.contact=typeof c.contact==="string"?c.contact.trim():"";
+  c.hiring=typeof c.hiring==="string"?c.hiring:"active";
+  // Meta — force dot-separated single line
+  var raw=typeof c.meta==="string"?c.meta:"";
+  c.meta=raw.split("\n").join(" · ").split("\r").join("").split("\\n").join(" · ").split("|").join(" · ").replace(/ +· +/g," · ").replace(/· +·/g,"·").replace(/^ · | · $/g,"").replace(/ {2,}/g," ").trim();
+  // Numbers
+  c.fit=typeof c.fit==="number"?c.fit:0;
+  c.opportunity=typeof c.opportunity==="number"?c.opportunity:0;
+  c.outreach=typeof c.outreach==="number"?c.outreach:0;
+  // Arrays
+  c.tags=Array.isArray(c.tags)?c.tags.filter(Boolean):[];
+  c.needs=Array.isArray(c.needs)?c.needs.filter(Boolean):[];
+  c.signals=Array.isArray(c.signals)?c.signals.filter(function(s){return s&&s.title;}):[];
+  c.levelUp=Array.isArray(c.levelUp)?c.levelUp.filter(Boolean):[];
+  // People — deep normalize
+  c.people=Array.isArray(c.people)?c.people.filter(Boolean).map(function(p){
+    p.name=typeof p.name==="string"&&p.name.trim()?p.name.trim():"Unknown";
+    p.role=typeof p.role==="string"?p.role.trim():"";
+    p.why=typeof p.why==="string"?p.why.trim():"";
+    p.tag=typeof p.tag==="string"?p.tag:"tag-founder";
+    p.tagLabel=typeof p.tagLabel==="string"?p.tagLabel:"Team";
+    p.avColor=typeof p.avColor==="string"?p.avColor:"terra";
+    p.channel=typeof p.channel==="string"?p.channel:"email";
+    p.channelLabel=typeof p.channelLabel==="string"?p.channelLabel:"Email";
+    p.li=typeof p.li==="string"?p.li:"linkedin.com";
+    p.whyConf=typeof p.whyConf==="string"?p.whyConf:"low";
+    p.whyConfSource=typeof p.whyConfSource==="string"?p.whyConfSource:"";
+    p.intent=Array.isArray(p.intent)?p.intent:(typeof p.intent==="string"?[p.intent]:["collab","job"]);
+    if(!p.notes||typeof p.notes!=="object")p.notes={curious:"",technical:""};
+    return p;
+  }):[];
+  // levelUp — deep normalize
+  c.levelUp=c.levelUp.map(function(p){
+    p.title=typeof p.title==="string"?p.title.trim():"Project";
+    p.weekends=typeof p.weekends==="number"?p.weekends:2;
+    p.why=typeof p.why==="string"?p.why.trim():"";
+    p.stack=typeof p.stack==="string"?p.stack.trim():"";
+    p.outcome=typeof p.outcome==="string"?p.outcome.trim():"";
+    p.capabilities=Array.isArray(p.capabilities)?p.capabilities.filter(Boolean):[];
+    return p;
+  });
+  // Signals — deep normalize
+  c.signals=c.signals.map(function(s){
+    s.type=typeof s.type==="string"?s.type:"product";
+    s.icon=typeof s.icon==="string"?s.icon:"&#128161;";
+    s.iconClass=typeof s.iconClass==="string"?s.iconClass:"sig-product";
+    s.typeClass=typeof s.typeClass==="string"?s.typeClass:"type-product";
+    s.title=typeof s.title==="string"?s.title.trim():"";
+    s.detail=typeof s.detail==="string"?s.detail.trim():"";
+    s.impact=typeof s.impact==="string"?s.impact.trim():"";
+    s.date=typeof s.date==="string"?s.date.trim():"";
+    return s;
+  });
+  // Brief
+  c.brief=c.brief&&typeof c.brief==="object"?c.brief:{};
+  // fitBreakdown
+  if(!c.fitBreakdown||typeof c.fitBreakdown!=="object")c.fitBreakdown={domain:c.fit,technical:c.fit,stage:c.fit,network:c.fit,experience:c.fit};
+  return c;
+}
 function openCompany(idx){
   var src=(S.usingAI&&S.aiResults&&S.aiResults.length>0)?S.aiResults:companies;
   var c=src[idx];if(!c)return;
@@ -2297,7 +2366,7 @@ function showLinkedInSend(idx){var p=S.currentPeople[idx];if(!p)return;document.
 document.getElementById("sq").addEventListener("keydown",function(e){if(e.key==="Enter")doSearch()});
 document.getElementById("app-sq").addEventListener("keydown",function(e){if(e.key==="Enter")appSearch()});
 document.getElementById("app-conn-to").addEventListener("keydown",function(e){if(e.key==="Enter")appConnSearch()});
-loadS();updateProfileUI();updateFilterCount();setTimeout(twTick,600);checkFirstRun();
+companies=companies.map(normalizeCompany);loadS();updateProfileUI();updateFilterCount();setTimeout(twTick,600);checkFirstRun();
 if(!document.querySelector(".persona.selected"))selectPersona("job",true);
 
 </script>
