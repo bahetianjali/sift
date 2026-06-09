@@ -1244,12 +1244,16 @@ function selectPersona(intent,silent){
       if(sS2)sS2.style.display="";
       if(lH2)lH2.style.display="";
       if(ltC2){var coEl=document.getElementById("cocount");ltC2.innerHTML='&#127968; Companies (<span id="cocount">'+(coEl?coEl.textContent:"0")+'</span>)';}
-      if(S.currentCo){
-        // Company open: re-render deep dive with new persona tabs
+      // Re-search with new persona if AI-powered results exist
+      if(S.query&&S.profile.key&&(S.usingAI||S.aiResults)){
+        var intentNames={collab:"The Founder",job:"The Climber"};
+        document.getElementById("loading").style.display="flex";
+        document.getElementById("ltext").textContent="Researching as "+(intentNames[intent]||intent)+"...";
+        setTimeout(function(){doSearch();},200);
+      } else if(S.currentCo){
         var coIdx=companies.indexOf(S.currentCo);
         if(coIdx>-1)openCompany(coIdx);
       } else if(S.query){
-        // No company selected but search done: refresh list
         buildResults();
       }
     }
@@ -1584,15 +1588,19 @@ async function siftWithAI(query,key){
     "signals":[{"type":"hiring","icon":"&#128101;","iconClass":"sig-hiring","typeClass":"type-hiring","title":"Actively hiring backend engineers","detail":"Posted 8 roles in last 30 days","impact":"Team is scaling fast","date":"Jun 2026"},{"type":"funding","icon":"&#128176;","iconClass":"sig-funding","typeClass":"type-funding","title":"Series B closed","detail":"$40M led by Sequoia","impact":"18 months of runway","date":"Apr 2026"}],
     "contact":"firstname@acmecorp.com","contactConf":"pattern guess",
     "li":"linkedin.com/in/foundername","x":"@foundername",
-    "people":[{"name":"Jane Smith","role":"CEO, Co-founder","tag":"tag-founder","tagLabel":"Founder","avColor":"terra","why":"Building the company vision, will respond to relevant technical outreach","whyConf":"high","whyConfSource":"Publicly identified founder","channel":"email","channelLabel":"Email","li":"linkedin.com/in/janesmith","x":"@janesmith","notes":{"curious":"Hi Jane, I work on data pipelines at Movius and noticed Acme is solving a similar problem. Would love to hear how you think about it.","technical":"Hi Jane, I build multi-source ingestion systems. The schema drift problem you face maps closely to what I work on. Happy to share notes."},"intent":["collab","job"]},{"name":"Bob Lee","role":"Head of Engineering","tag":"tag-hiring","tagLabel":"Hiring","avColor":"indigo","why":"Likely hiring for backend roles given recent job postings","whyConf":"medium","whyConfSource":"Inferred from LinkedIn and job board activity","channel":"linkedin","channelLabel":"LinkedIn","li":"linkedin.com/in/boblee","x":null,"notes":{"curious":"Hi Bob, I work on data pipelines and noticed Acme is expanding the backend team. Would love to connect.","technical":"Hi Bob, backend engineer here focused on pipeline reliability. Saw the open roles and wanted to connect."},"intent":["job"]}],
+    "people":[{"name":"Jane Smith","role":"CEO, Co-founder","tag":"tag-founder","tagLabel":"Founder","avColor":"terra","why":"Building the company vision — will respond to relevant technical outreach","whyConf":"high","whyConfSource":"Publicly identified founder at acmecorp.com","channel":"email","channelLabel":"Email","li":"linkedin.com/in/janesmith","x":"@janesmith","notes":{"curious":"Hi Jane, I work on data pipelines at Movius and noticed Acme is solving a similar problem. Would love to hear how you think about it.","technical":"Hi Jane, I build multi-source ingestion systems at Movius. The schema drift problem maps closely to what I work on."},"intent":["collab","job"]},{"name":"Bob Lee","role":"VP of Engineering","tag":"tag-hiring","tagLabel":"Engineering","avColor":"indigo","why":"Likely oversees backend hiring given recent engineering job postings","whyConf":"medium","whyConfSource":"Inferred from LinkedIn title and job board postings at acmecorp.com","channel":"linkedin","channelLabel":"LinkedIn","li":"linkedin.com/in/boblee","x":null,"notes":{"curious":"Hi Bob, I work on data pipelines and noticed Acme is expanding the backend team. Would love to connect.","technical":"Hi Bob, backend engineer focused on pipeline reliability. Saw the open roles and wanted to reach out."},"intent":["job"]},{"name":"Sarah Kim","role":"Head of Recruiting","tag":"tag-recruiter","tagLabel":"Recruiter","avColor":"teal","why":"Actively posting engineering roles at this company","whyConf":"medium","whyConfSource":"Listed as recruiter on LinkedIn job postings for acmecorp.com","channel":"linkedin","channelLabel":"LinkedIn","li":"linkedin.com/in/sarahkim","x":null,"notes":{"curious":"Hi Sarah, backend engineer with 4 years in data pipelines. Noticed the open engineering roles and wanted to connect.","technical":"Hi Sarah, backend engineer specializing in pipeline reliability. Interested in the engineering roles at Acme."},"intent":["job"]}],
     "levelUp":[{"title":"Build an open-source tool that solves their core data problem","weekends":2,"why":"This company ingests data from inconsistent sources. A public tool demonstrates you can ship the exact capability they need.","capabilities":["Schema normalization across heterogeneous sources","Ingestion reliability when upstream formats change","Data quality monitoring at the input layer"],"stack":"Python, GitHub, public sample data","outcome":"Fit moves from 85 to 93."},{"title":"Write a technical article about the problem they are solving","weekends":1,"why":"No canonical resource exists for this problem. Writing it positions you as someone who understands it deeply.","capabilities":["Domain authority in their space","Linkable artifact for cold outreach","Signals depth without an application"],"stack":"Your blog or Substack","outcome":"Strengthens outreach credibility significantly."}],
     "email":"Hi Jane,\n\nI am a backend engineer at Movius working on data pipeline reliability.\n\nI noticed Acme is solving X problem. The challenge of Y maps closely to what I work on in telecom data.\n\nWould love to hear how you think about Z.\n\nAnjali Baheti",
     "followup":"Hi Jane, following up briefly. I think the overlap between what I work on and what Acme is building is worth a 15-minute conversation. Happy to work around your schedule."
   };
   var sysMsg="You are Sift, an opportunity discovery engine. You MUST return ONLY valid JSON. No markdown fences, no explanation, no text outside the JSON. Follow the example structure EXACTLY — same field names, same types, same nesting. Replace all values with real data for the requested company/domain. The meta field MUST be a single line formatted as: City · Stage · $XM raised · ~N people (use the · character, never newlines). All array fields must be arrays. All string fields must be strings. All number fields must be numbers.";
   var prompt=isCompany
-    ?(sysMsg+" Return a JSON array with exactly 1 object for the company: "+query+". User background: "+bio+". Example structure to follow: "+JSON.stringify([EXAMPLE_COMPANY]))
-    :(sysMsg+" Return a JSON array with exactly 3 objects for companies in this domain: "+query+". User background: "+bio+". Example structure to follow (replicate this structure for each company): "+JSON.stringify([EXAMPLE_COMPANY]));
+    ?(sysMsg+
+    " The user is researching this specific company by domain: "+query+
+    ". IMPORTANT: Use the domain '"+query+"' as the source of truth. Find the real CEO/founder of the company at this exact domain — not a similarly named company. Find real people who work at this company. For the people array, include: (1) the actual CEO or founder of "+query+", (2) a real engineering leader (CTO, VP Eng, Head of Engineering) at "+query+", (3) a recruiter or people ops person if findable. Use LinkedIn, Crunchbase, and public sources to identify real names at this specific domain. If you are not confident about a person, set whyConf to low and whyConfSource to 'Inferred — verify before outreach'. Never return a person from a different company. The brief.Domain field must be set to '"+query+"'."+
+    " User background: "+bio+
+    ". Example structure to follow: "+JSON.stringify([EXAMPLE_COMPANY]))
+    :(sysMsg+" Return a JSON array with exactly 5 objects for companies in this domain: "+query+". User background: "+bio+". Example structure to follow (replicate this structure for each company): "+JSON.stringify([EXAMPLE_COMPANY]));
     // Replace YOUR-PROJECT with your Vercel URL after deploying
   var VERCEL_URL="https://YOUR-PROJECT.vercel.app";
   var resp,data,text;
