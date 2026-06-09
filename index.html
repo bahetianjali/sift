@@ -1997,7 +1997,7 @@ function buildSignals(c){
   document.getElementById("d-signals").innerHTML='<div class="why-now-score"><div class="why-num">'+c.opportunity+'</div><div><div class="why-label">Why Now Score</div><div class="why-desc">'+c.opportunityReason+'</div></div></div>'+feed;
 }
 function buildPeople(c){if(!c.people||!c.people.length){document.getElementById("d-people").innerHTML='<div style="color:var(--muted);font-size:13px;padding:20px 0">No people data available for this company.</div>';return;}
-  S.currentPeople=(c.people||[]).filter(function(p){if(!p)return false;var intent=p.intent||["collab","job","network"];if(S.intent==="collab")return intent.indexOf("collab")>-1;if(S.intent==="job")return intent.indexOf("job")>-1||intent.indexOf("collab")>-1;return true;});
+  S.currentPeople=(c.people||[]).filter(function(p){if(!p)return false;var intent=Array.isArray(p.intent)?p.intent:(p.intent?[p.intent]:["collab","job","network"]);if(S.intent==="collab")return intent.indexOf("collab")>-1;if(S.intent==="job")return intent.indexOf("job")>-1||intent.indexOf("collab")>-1;return true;});
   var label=S.intent==="collab"?"Founders & Peers to Reach":S.intent==="job"?"People to Reach for Roles":"People in This Domain";
   var warning='<div style="background:#FFF8E1;border:1px solid #FFD54F;border-radius:8px;padding:9px 12px;font-size:11px;color:#795548;line-height:1.55;margin-bottom:12px">&#9888; <strong>Unverified contacts:</strong> Email addresses and handles are pattern guesses based on naming conventions, not confirmed. Verify before sending.</div>';
   var styleLabels={curious:"Curious",technical:"Technical"};
