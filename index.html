@@ -754,7 +754,46 @@ body:not(.app-mode) .main{display:none}
     <div class="modal-sub" id="settings-sub">Your bio personalizes every search. Your API key never leaves your browser.</div>
     <div class="modal-section"><label class="modal-label">Your name</label><input id="setting-name" type="text" placeholder="e.g. Anjali Baheti"></div>
     <div class="modal-section"><label class="modal-label">Your bio</label><textarea id="setting-bio" placeholder="e.g. Backend engineer, 4 years at Movius. Built data pipelines, AI integrations. Open to opportunities in climate tech and AI infrastructure."></textarea><div class="modal-hint">Or paste your LinkedIn URL &mdash; we will read it from there in the real product.</div></div>
-    <div class="modal-section"><label class="modal-label">Anthropic API Key</label><input id="setting-key" type="password" placeholder="sk-..."><div class="modal-hint" id="key-hint">Get a free key at <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--terra-deep)">platform.openai.com/api-keys</a>. Stored only in your browser, never shared.</div></div>
+    <div class="modal-section">
+      <label class="modal-label">API Key (free)</label>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:10px;font-size:12px;line-height:1.7;color:var(--ink2)">
+        <div style="font-weight:700;color:var(--ink);margin-bottom:6px">Add your own key for unlimited searches</div>
+
+        <!-- Anthropic instructions -->
+        <div id="key-instructions-anth" style="display:block">
+          <div style="font-weight:600;color:var(--ink);margin-bottom:4px">&#9678; Anthropic key <span style="font-weight:400;color:var(--muted)">(starts with sk-ant-)</span></div>
+          <div style="display:flex;flex-direction:column;gap:3px;padding-left:8px;margin-bottom:8px">
+            <div><span style="font-weight:700;color:var(--pd)">1.</span> Go to <a href="https://console.anthropic.com" target="_blank" style="color:var(--pd);font-weight:600">console.anthropic.com</a> → API Keys → Create Key</div>
+            <div><span style="font-weight:700;color:var(--pd)">2.</span> Add $5 credit — prepaid, not a subscription</div>
+            <div><span style="font-weight:700;color:var(--pd)">3.</span> Paste below — model selector appears automatically</div>
+          </div>
+        </div>
+
+        <!-- OpenAI instructions -->
+        <div id="key-instructions-oai" style="display:none">
+          <div style="font-weight:600;color:var(--ink);margin-bottom:4px">&#9678; OpenAI key <span style="font-weight:400;color:var(--muted)">(starts with sk-)</span></div>
+          <div style="display:flex;flex-direction:column;gap:3px;padding-left:8px;margin-bottom:8px">
+            <div><span style="font-weight:700;color:var(--pd)">1.</span> Go to <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--pd);font-weight:600">platform.openai.com/api-keys</a> → Create Key</div>
+            <div><span style="font-weight:700;color:var(--pd)">2.</span> Add $5 at <a href="https://platform.openai.com/settings/billing" target="_blank" style="color:var(--pd)">platform.openai.com/settings/billing</a></div>
+            <div><span style="font-weight:700;color:var(--pd)">3.</span> Paste below — model selector appears automatically</div>
+          </div>
+        </div>
+
+        <!-- Model selector — shown after key is detected -->
+        <div id="model-selector-wrap" style="display:none;margin-bottom:10px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:5px">Model</div>
+          <select id="model-select" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--card);color:var(--ink);outline:none;cursor:pointer">
+          </select>
+          <div id="model-cost-hint" style="margin-top:5px;font-size:11px;color:var(--muted)"></div>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 11px;font-size:11px;color:var(--muted);line-height:1.55">
+          Your key stays in your browser only. It goes directly to Anthropic or OpenAI — never through Sift.
+        </div>
+      </div>
+      <input id="setting-key" type="password" placeholder="Paste your key here..." oninput="detectKeyProvider(this.value)">
+      <div class="modal-hint" id="key-hint"></div>
+    </div>
     <div class="modal-actions"><button class="modal-btn primary" onclick="saveSettings()">Save &amp; Start Sifting</button><button class="modal-btn secondary" id="settings-cancel-btn" onclick="closeSettings()">Cancel</button></div>
   </div>
 </div>
@@ -780,7 +819,7 @@ body:not(.app-mode) .main{display:none}
 
 <script>
 // ── STATE ──
-var S={intent:"job",geo:"world",visa:false,sort:"fit",mode:"domain",query:"",currentCo:null,currentPeople:[],filtersOpen:false,aiResults:null,usingAI:false,profile:{name:"",bio:"",key:""}};
+var S={intent:"job",geo:"world",visa:false,sort:"fit",mode:"domain",query:"",currentCo:null,currentPeople:[],filtersOpen:false,aiResults:null,usingAI:false,profile:{name:"",bio:"",key:"",anthModel:"claude-sonnet-4-6",oaiModel:"gpt-4o"}};
 
 // ── TRANSITION DATA ──
 var transitionData={
@@ -1237,9 +1276,18 @@ function toggleVisa(){S.visa=!S.visa;document.getElementById("visa-check").inner
   }
 }
 function setSort(v){S.sort=v;saveS();if(S.query)buildResults();}
-function openSettings(){document.getElementById("setting-name").value=S.profile.name||"";document.getElementById("setting-bio").value=S.profile.bio||"";document.getElementById("setting-key").value=S.profile.key||"";document.getElementById("settings-modal").classList.add("open");}
+function openSettings(){document.getElementById("setting-name").value=S.profile.name||"";document.getElementById("setting-bio").value=S.profile.bio||"";document.getElementById("setting-key").value=S.profile.key||"";
+  var keyVal=S.profile.key||"";
+  setTimeout(function(){detectKeyProvider(keyVal);},50);
+  document.getElementById("settings-modal").classList.add("open");}
 function closeSettings(){document.getElementById("settings-modal").classList.remove("open");}
-function saveSettings(){S.profile.name=document.getElementById("setting-name").value.trim();S.profile.bio=document.getElementById("setting-bio").value.trim();S.profile.key=document.getElementById("setting-key").value.trim();updateProfileUI();saveS();var cancelBtn=document.getElementById("settings-cancel-btn");if(cancelBtn)cancelBtn.style.display="";var title=document.getElementById("settings-title");if(title)title.textContent="Your Profile & Setup";var sub=document.getElementById("settings-sub");if(sub)sub.textContent="Your bio personalizes every search. Your API key never leaves your browser.";var nudge=document.getElementById("profile-nudge");if(nudge&&S.profile.bio&&S.profile.key)nudge.style.display="none";closeSettings();}
+function saveSettings(){S.profile.name=document.getElementById("setting-name").value.trim();S.profile.bio=document.getElementById("setting-bio").value.trim();S.profile.key=document.getElementById("setting-key").value.trim();
+  var sel=document.getElementById("model-select");
+  var key=S.profile.key;
+  if(sel&&sel.value){
+    if(key.startsWith("sk-ant-"))S.profile.anthModel=sel.value;
+    else if(key.startsWith("sk-"))S.profile.oaiModel=sel.value;
+  }updateProfileUI();saveS();var cancelBtn=document.getElementById("settings-cancel-btn");if(cancelBtn)cancelBtn.style.display="";var title=document.getElementById("settings-title");if(title)title.textContent="Your Profile & Setup";var sub=document.getElementById("settings-sub");if(sub)sub.textContent="Your bio personalizes every search. Your API key never leaves your browser.";var nudge=document.getElementById("profile-nudge");if(nudge&&S.profile.bio&&S.profile.key)nudge.style.display="none";closeSettings();}
 function showConfCTA(){document.getElementById("conf-modal").classList.add("open");}
 function closeConf(){document.getElementById("conf-modal").classList.remove("open");}
 function voteConf(){var v=parseInt(localStorage.getItem("sift_conf_votes")||"0",10)+1;try{localStorage.setItem("sift_conf_votes",String(v))}catch(e){}alert("Thanks! We build this when enough early users vote.");closeConf();}
@@ -1261,9 +1309,9 @@ function doSearch(){
   });
   var key=S.profile.key;
   var hasBio=S.profile.bio&&S.profile.bio.trim().length>10;
-  if(!hasBio||!key){
+  if(!hasBio){
     // No profile/key — if demo match exists use it, otherwise prompt
-    if(demoMatch.length>0&&hasBio){
+    if(demoMatch.length>0){
       document.getElementById("loading").style.display="flex";
       document.getElementById("ltext").textContent="Loading demo data...";
       setTimeout(function(){
@@ -1301,6 +1349,79 @@ function doSearch(){
     var msg=err&&err.message?err.message:"Search failed. Check your API key in Settings.";
     showToast(msg);
   });
+}
+function updateFreeUsage(userRemaining,globalRemaining){
+  var el=document.getElementById("free-usage");
+  if(!el){
+    el=document.createElement("div");
+    el.id="free-usage";
+    el.style.cssText="position:fixed;bottom:24px;right:24px;font-size:11px;font-weight:600;color:var(--muted);z-index:500;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer";
+    el.title="Add your own Anthropic key for unlimited searches";
+    el.onclick=function(){openSettingsFirstRun();};
+    document.body.appendChild(el);
+  }
+  if(userRemaining!==undefined){
+    var searches=Math.floor(userRemaining/3000);
+    el.textContent="~"+searches+" free searches left today";
+    el.style.display=userRemaining<6000?"block":"block";
+  }
+}
+function showLimitReached(message,errType){
+  var nudge=document.getElementById("profile-nudge");
+  if(nudge){
+    nudge.innerHTML="&#9888; "+message+" <span style='text-decoration:underline;cursor:pointer;margin-left:4px' onclick='openSettingsFirstRun()'>Add your Anthropic key</span> to keep going.";
+    nudge.style.display="block";
+  }
+  if(errType!=="global_cap_reached")showToast(message);
+}
+var ANTHROPIC_MODELS=[
+  {value:"claude-opus-4-8",label:"Opus 4.8 — most capable · ~100 searches per $5",hint:"Best reasoning and writing. $5/$25 per million tokens. Best for high-stakes outreach."},
+  {value:"claude-opus-4-7",label:"Opus 4.7 · ~100 searches per $5",hint:"Same pricing as Opus 4.8. $5/$25 per million tokens."},
+  {value:"claude-opus-4-6",label:"Opus 4.6 · ~100 searches per $5",hint:"Same pricing as Opus 4.7. $5/$25 per million tokens."},
+  {value:"claude-sonnet-4-6",label:"Sonnet 4.6 — recommended · ~170 searches per $5",hint:"Best balance of quality and cost. $3/$15 per million tokens."},
+  {value:"claude-haiku-4-5",label:"Haiku 4.5 — fast & cheap · ~510 searches per $5",hint:"Good for exploring. $1/$5 per million tokens."}
+];
+var OAI_MODELS=[
+  {value:"gpt-4o",label:"GPT-4o — recommended · ~125 searches per $5",hint:"Best quality. $2.50/$10 per million tokens."},
+  {value:"gpt-4o-mini",label:"GPT-4o-mini — fast & cheap · ~4,000 searches per $5",hint:"Good for exploring. $0.15/$0.60 per million tokens."}
+];
+function detectKeyProvider(val){
+  var isAnth=val.startsWith("sk-ant-");
+  var isOAI=val.startsWith("sk-")&&!val.startsWith("sk-ant-");
+  var anthInstr=document.getElementById("key-instructions-anth");
+  var oaiInstr=document.getElementById("key-instructions-oai");
+  var selectorWrap=document.getElementById("model-selector-wrap");
+  var sel=document.getElementById("model-select");
+  var hint=document.getElementById("model-cost-hint");
+  if(isAnth){
+    if(anthInstr)anthInstr.style.display="block";
+    if(oaiInstr)oaiInstr.style.display="none";
+    if(selectorWrap)selectorWrap.style.display="block";
+    sel.innerHTML=ANTHROPIC_MODELS.map(function(m){return'<option value="'+m.value+'">'+m.label+'</option>';}).join("");
+    sel.value=S.profile.anthModel||"claude-sonnet-4-6";
+    if(hint)hint.textContent=ANTHROPIC_MODELS.find(function(m){return m.value===sel.value;})||ANTHROPIC_MODELS[0].hint;
+    sel.onchange=function(){
+      var found=ANTHROPIC_MODELS.find(function(m){return m.value===sel.value;});
+      if(hint)hint.textContent=found?found.hint:"";
+    };
+  } else if(isOAI){
+    if(anthInstr)anthInstr.style.display="none";
+    if(oaiInstr)oaiInstr.style.display="block";
+    if(selectorWrap)selectorWrap.style.display="block";
+    sel.innerHTML=OAI_MODELS.map(function(m){return'<option value="'+m.value+'">'+m.label+'</option>';}).join("");
+    sel.value=S.profile.oaiModel||"gpt-4o";
+    var found=OAI_MODELS.find(function(m){return m.value===sel.value;});
+    if(hint)hint.textContent=found?found.hint:"";
+    sel.onchange=function(){
+      var found=OAI_MODELS.find(function(m){return m.value===sel.value;});
+      if(hint)hint.textContent=found?found.hint:"";
+    };
+  } else {
+    // Blank or unrecognised — show Anthropic instructions by default, hide selector
+    if(anthInstr)anthInstr.style.display="block";
+    if(oaiInstr)oaiInstr.style.display="none";
+    if(selectorWrap)selectorWrap.style.display="none";
+  }
 }
 function showToast(msg){
   var t=document.getElementById("sift-toast");
@@ -1341,18 +1462,60 @@ async function siftWithAI(query,key){
   var prompt=isCompany
     ?"You are Sift, an opportunity discovery engine. The user is researching the company: "+query+". Their background: "+bio+". Return a JSON array with exactly 1 company object. The object must have these fields: name (string), meta (string, format: 'City · Stage · Raised · ~N people'), desc (string, one sentence), tags (array of 2 strings), fit (number 0-100), fitBreakdown (object with keys domain,technical,stage,network,experience each 0-100), opportunity (number 0-100), outreach (number 0-100), hiring (one of: active|selective|collab), visaSponsors (boolean or null), brief (object with keys Company,Domain,Stage,Raised,Team,Problem,Bet,Winning,Struggling), needs (array of 4 strings), fitReason (string, 1-2 sentences connecting user background to company problem), whyShort (string, under 15 words, the most compelling why-now signal), opportunityReason (string, 2-3 sentences), signals (array of 2-3 objects each with: type,icon,iconClass,typeClass,title,detail,impact,date — use type hiring/funding/product, icon as emoji HTML entity, iconClass as sig-hiring/sig-funding/sig-product, typeClass as type-hiring/type-funding/type-product), contact (string, best guess email like firstname@domain.com), contactConf (string: verified|public|pattern guess), li (string, linkedin.com/in/handle), x (string or null, @handle), people (array of 2-3 person objects each with: name,role,tag (tag-founder|tag-recruiter|tag-hiring),tagLabel,avColor (terra|indigo|teal),why,whyConf (high|medium|low),whyConfSource,channel (email|linkedin|x),channelLabel,li,x (or null),notes (object with keys curious and technical, each a short 2-3 sentence message),intent (array containing job and/or collab)), levelUp (array of 2 objects each with: title,weekends (number),why,capabilities (array of 3 strings),stack,outcome), email (string, full cold email), followup (string, short follow-up). Return ONLY valid JSON, no markdown, no explanation."
     :"You are Sift, an opportunity discovery engine. The user is searching the domain: "+query+". Their background: "+bio+". Return a JSON array of 3-5 company objects. Each object must have these exact fields: name,meta,desc,tags,fit,fitBreakdown,opportunity,outreach,hiring,visaSponsors,brief,needs,fitReason,whyShort,opportunityReason,signals,contact,contactConf,li,x,people,levelUp,email,followup. Use the same schema as the company mode above. Return ONLY valid JSON array, no markdown, no explanation.";
-  var resp=await fetch("https://api.openai.com/v1/chat/completions",{
-    method:"POST",
-    headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},
-    body:JSON.stringify({model:"gpt-4o-mini",max_tokens:4000,messages:[{role:"user",content:prompt}]})
-  });
-  if(!resp.ok){
-    var err=await resp.json().catch(function(){return{};});
-    if(resp.status===401)throw new Error("Invalid API key. Check your key in Settings.");
-    throw new Error(err.error&&err.error.message?err.error.message:"API error "+resp.status);
+  // Replace YOUR-PROJECT with your Vercel URL after deploying
+  var VERCEL_URL="https://YOUR-PROJECT.vercel.app";
+  var resp,data,text;
+  if(key){
+    // Detect provider by key prefix
+    var isOpenAI=key.startsWith("sk-")&&!key.startsWith("sk-ant-");
+    if(isOpenAI){
+      // OpenAI key
+      resp=await fetch("https://api.openai.com/v1/chat/completions",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},
+        body:JSON.stringify({model:S.profile.oaiModel||"gpt-4o",max_tokens:4000,messages:[{role:"user",content:prompt}]})
+      });
+      if(!resp.ok){
+        var err=await resp.json().catch(function(){return{};});
+        if(resp.status===401)throw new Error("Invalid OpenAI key. Check your key in Settings.");
+        throw new Error(err.error&&err.error.message?err.error.message:"API error "+resp.status);
+      }
+      data=await resp.json();
+      text=data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content;
+    } else {
+      // Anthropic key
+      resp=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+        body:JSON.stringify({model:S.profile.anthModel||"claude-sonnet-4-6",max_tokens:4000,messages:[{role:"user",content:prompt}]})
+      });
+      if(!resp.ok){
+        var err=await resp.json().catch(function(){return{};});
+        if(resp.status===401)throw new Error("Invalid Anthropic key. Check your key in Settings.");
+        throw new Error(err.error&&err.error.message?err.error.message:"API error "+resp.status);
+      }
+      data=await resp.json();
+      text=data.content&&data.content[0]&&data.content[0].text;
+    }
+  } else {
+    // No key — use free proxy (limited)
+    resp=await fetch(VERCEL_URL+"/api/sift",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({prompt:prompt})
+    });
+    if(!resp.ok){
+      var err=await resp.json().catch(function(){return{};});
+      if(resp.status===429){
+        showLimitReached(err.message||"Free searches are over for today.",err.error||"");
+        return null;
+      }
+      throw new Error(err.message||"Proxy error "+resp.status);
+    }
+    data=await resp.json();
+    text=data.text;
+    updateFreeUsage(data.userRemaining,data.globalRemaining);
   }
-  var data=await resp.json();
-  var text=data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content;
   if(!text)return null;
   var clean=text.replace(/```json|```/g,"").trim();
   var parsed=JSON.parse(clean);
