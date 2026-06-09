@@ -1593,14 +1593,14 @@ async function siftWithAI(query,key){
     "email":"Hi Jane,\n\nI am a backend engineer at Movius working on data pipeline reliability.\n\nI noticed Acme is solving X problem. The challenge of Y maps closely to what I work on in telecom data.\n\nWould love to hear how you think about Z.\n\nAnjali Baheti",
     "followup":"Hi Jane, following up briefly. I think the overlap between what I work on and what Acme is building is worth a 15-minute conversation. Happy to work around your schedule."
   };
-  var sysMsg="You are Sift, an opportunity discovery engine. You MUST return ONLY valid JSON. No markdown fences, no explanation, no text outside the JSON. Follow the example structure EXACTLY — same field names, same types, same nesting. Replace all values with real data for the requested company/domain. The meta field MUST be a single line formatted as: City · Stage · $XM raised · ~N people (use the · character, never newlines). All array fields must be arrays. All string fields must be strings. All number fields must be numbers.";
+  // CARD PROMPT — lightweight, fast (~800 tokens output)
+  var cardExample=[{"name":"Acme Corp","meta":"San Francisco · Series B · $40M raised · ~80 people","desc":"One sentence on what they build.","tags":["Tag1","Tag2"],"fit":85,"fitBreakdown":{"domain":88,"technical":90,"stage":80,"network":70,"experience":85},"opportunity":78,"outreach":72,"hiring":"active","visaSponsors":true,"fitReason":"1-2 sentences why user background matches.","whyShort":"Under 15 words why now.","brief":{"Company":"Acme Corp","Domain":"acmecorp.com","Stage":"Series B","Raised":"$40M","Team":"~80","Problem":"Core problem","Bet":"What they bet on","Winning":"Why winning","Struggling":"Current bottleneck"},"needs":["Need 1","Need 2","Need 3","Need 4"]}];
+  // DETAIL PROMPT — full data, only called on click
+  var detailExample={"signals":[{"type":"hiring","icon":"&#128101;","iconClass":"sig-hiring","typeClass":"type-hiring","title":"Signal title","detail":"Detail","impact":"Why it matters","date":"Jun 2026"}],"contact":"ceo@acmecorp.com","contactConf":"pattern guess","li":"linkedin.com/in/ceofullname","x":"@ceohandle","people":[{"name":"Jane Smith","role":"CEO, Co-founder","tag":"tag-founder","tagLabel":"Founder","avColor":"terra","why":"Founding CEO","whyConf":"high","whyConfSource":"Publicly identified founder at acmecorp.com","channel":"email","channelLabel":"Email","li":"linkedin.com/in/janesmith","x":"@janesmith","notes":{"curious":"Hi Jane, I work on data pipelines and noticed Acme is solving a similar problem.","technical":"Hi Jane, I build ingestion systems at Movius. The schema drift problem maps to what I work on."},"intent":["collab","job"]},{"name":"Bob Lee","role":"VP Engineering","tag":"tag-hiring","tagLabel":"Engineering","avColor":"indigo","why":"Oversees backend hiring","whyConf":"medium","whyConfSource":"Inferred from LinkedIn at acmecorp.com","channel":"linkedin","channelLabel":"LinkedIn","li":"linkedin.com/in/boblee","x":null,"notes":{"curious":"Hi Bob, backend engineer here. Noticed Acme is expanding the engineering team.","technical":"Hi Bob, pipeline reliability engineer. Saw the open backend roles."},"intent":["job"]},{"name":"Sarah Kim","role":"Recruiter","tag":"tag-recruiter","tagLabel":"Recruiter","avColor":"teal","why":"Posting engineering roles","whyConf":"medium","whyConfSource":"Listed on job postings at acmecorp.com","channel":"linkedin","channelLabel":"LinkedIn","li":"linkedin.com/in/sarahkim","x":null,"notes":{"curious":"Hi Sarah, backend engineer with 4 years in data pipelines.","technical":"Hi Sarah, pipeline reliability engineer interested in Acme roles."},"intent":["job"]}],"levelUp":[{"title":"Build a tool that solves their core problem","weekends":2,"why":"Demonstrates the exact capability they need.","capabilities":["Cap 1","Cap 2","Cap 3"],"stack":"Python, GitHub","outcome":"Fit moves from 85 to 93."},{"title":"Write about their problem space","weekends":1,"why":"Positions you as a practitioner.","capabilities":["Domain authority","Linkable artifact","Signals depth"],"stack":"Your blog","outcome":"Strengthens outreach credibility."}],"email":"Hi Jane,\n\nI am a backend engineer at Movius.\n\nAnjali Baheti","followup":"Hi Jane, following up briefly. Anjali"};
+  var sysMsg="You are Sift. Return ONLY valid JSON, no markdown, no text outside JSON. The meta field must be: City · Stage · $XM raised · ~N people (· character, never newlines). All arrays must be arrays, all strings must be strings, all numbers must be numbers.";
   var prompt=isCompany
-    ?(sysMsg+
-    " The user is researching this specific company by domain: "+query+
-    ". IMPORTANT: Use the domain '"+query+"' as the source of truth. Find the real CEO/founder of the company at this exact domain — not a similarly named company. Find real people who work at this company. For the people array, include: (1) the actual CEO or founder of "+query+", (2) a real engineering leader (CTO, VP Eng, Head of Engineering) at "+query+", (3) a recruiter or people ops person if findable. Use LinkedIn, Crunchbase, and public sources to identify real names at this specific domain. If you are not confident about a person, set whyConf to low and whyConfSource to 'Inferred — verify before outreach'. Never return a person from a different company. The brief.Domain field must be set to '"+query+"'."+
-    " User background: "+bio+
-    ". Example structure to follow: "+JSON.stringify([EXAMPLE_COMPANY]))
-    :(sysMsg+" Return a JSON array with exactly 5 objects for companies in this domain: "+query+". User background: "+bio+". Example structure to follow (replicate this structure for each company): "+JSON.stringify([EXAMPLE_COMPANY]));
+    ?(sysMsg+" Research this company by domain: "+query+". Use '"+query+"' as source of truth for all company data and people. Find the real CEO/founder at this domain. User background: "+bio+". Return a JSON array with exactly 1 object matching this card structure PLUS these detail fields: "+JSON.stringify(detailExample)+". Card structure: "+JSON.stringify(cardExample[0]))
+    :(sysMsg+" Find 5 companies in this domain: "+query+". User background: "+bio+". Return a JSON array with exactly 5 objects. Each object must match this structure exactly: "+JSON.stringify(cardExample[0]));
     // Replace YOUR-PROJECT with your Vercel URL after deploying
   var VERCEL_URL="https://YOUR-PROJECT.vercel.app";
   var resp,data,text;
@@ -1612,7 +1612,7 @@ async function siftWithAI(query,key){
       resp=await fetch("https://api.openai.com/v1/chat/completions",{
         method:"POST",
         headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},
-        body:JSON.stringify({model:S.profile.oaiModel||"gpt-4o",max_tokens:8000,messages:[{role:"user",content:prompt}]})
+        body:JSON.stringify({model:S.profile.oaiModel||"gpt-4o",max_tokens:isCompany?8000:3000,messages:[{role:"user",content:prompt}]})
       });
       if(!resp.ok){
         var err=await resp.json().catch(function(){return{};});
@@ -1626,7 +1626,7 @@ async function siftWithAI(query,key){
       resp=await fetch("https://api.anthropic.com/v1/messages",{
         method:"POST",
         headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-        body:JSON.stringify({model:S.profile.anthModel||"claude-sonnet-4-6",max_tokens:8000,messages:[{role:"user",content:prompt}]})
+        body:JSON.stringify({model:S.profile.anthModel||"claude-sonnet-4-6",max_tokens:isCompany?8000:3000,messages:[{role:"user",content:prompt}]})
       });
       if(!resp.ok){
         var err=await resp.json().catch(function(){return{};});
