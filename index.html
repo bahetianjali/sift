@@ -600,7 +600,7 @@ body:not(.app-mode) .main{display:none}
   </div><div class="personas-intro">
     <div class="eyebrow">Pick your lens</div>
     <h2 class="serif">Three different ways to read the same domain.</h2>
-    <p>Click the one that matches what you are trying to do. Sift adjusts what it surfaces.</p>
+    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Click the one that matches. Sift adjusts what it surfaces.</p>
   </div>
 
   <div class="personas">
@@ -763,7 +763,6 @@ body:not(.app-mode) .main{display:none}
   </div>
 
   <div id="personas-anchor" style="height:1px"></div>
-  <div class="footer-hint">Built for technical and creative professionals · v0 · <span style="cursor:pointer;color:var(--terra-deep)" onclick="openSettings()">Set up your profile</span> to personalize results.</div>
 </div>
 
 <div class="main">
@@ -810,7 +809,7 @@ body:not(.app-mode) .main{display:none}
 <div style="text-align:center;padding:20px 24px 32px;font-size:12px;color:var(--muted);line-height:1.8">
   Built by <strong style="color:var(--ink)">Anjali Baheti</strong> — backend engineer exploring what opportunity discovery could look like.<br>
   Questions, feedback, or just want to say hi?
-  <a href="https://www.linkedin.com/in/bahetianjali/" target="_blank" style="color:var(--pd);font-weight:600;margin-left:4px">Ping me on LinkedIn &#8599;</a>
+  <a href="https://www.linkedin.com/in/anjalibaheti" target="_blank" style="color:var(--pd);font-weight:600;margin-left:4px">Ping me on LinkedIn &#8599;</a>
 </div>
 
 <div class="modal-bg" id="settings-modal" onclick="if(event.target===this)closeSettings()">
@@ -1362,7 +1361,7 @@ function setSort(v){S.sort=v;saveS();if(S.query)buildResults();}
 function openSettings(){
   document.getElementById("setting-name").value=S.profile.name||"";
   // If bio matches old default, show as empty so placeholder appears
-  var oldDefaults=["Backend & AI Engineer with 4 years","Sr. Software Engineer at Movius building data pipelines","open to opportunities"];
+  var oldDefaults=["Backend & AI Engineer with 4 years","Sr. Software Engineer at Movius building data pipelines","open to opportunities","e.g. Backend engineer"];
   var bio=S.profile.bio||"";
   var isOldDefault=oldDefaults.some(function(d){return bio.indexOf(d)>-1;});
   document.getElementById("setting-bio").value=isOldDefault?"":bio;
@@ -1408,7 +1407,7 @@ function doSearch(){
         document.getElementById("loading").style.display="none";
         enterAppMode(false);buildResults();
         if(S.mode==="company"&&demoMatch.length>0)openCompany(companies.indexOf(demoMatch[0]));
-      },600);
+      },200);
     } else {
       showKeyPrompt();
     }
@@ -1425,13 +1424,10 @@ function doSearch(){
       S.aiResults=null;
       S.usingAI=false;
     }
-    document.getElementById("ltext").textContent="Scoring against your profile...";
-    setTimeout(function(){
-      document.getElementById("loading").style.display="none";
+    document.getElementById("loading").style.display="none";
       enterAppMode(false);buildResults();
       if(S.mode==="company"&&S.usingAI&&S.aiResults&&S.aiResults.length>0)openCompany(0);
       else if(S.mode==="company"&&demoMatch.length>0)openCompany(companies.indexOf(demoMatch[0]));
-    },400);
   }).catch(function(err){
     console.error("AI search failed:",err);
     S.aiResults=null;S.usingAI=false;
@@ -1489,7 +1485,7 @@ function detectKeyProvider(val){
     if(selectorWrap)selectorWrap.style.display="block";
     sel.innerHTML=ANTHROPIC_MODELS.map(function(m){return'<option value="'+m.value+'">'+m.label+'</option>';}).join("");
     sel.value=S.profile.anthModel||"claude-sonnet-4-6";
-    if(hint)hint.textContent=ANTHROPIC_MODELS.find(function(m){return m.value===sel.value;})||ANTHROPIC_MODELS[0].hint;
+    var foundModel=ANTHROPIC_MODELS.find(function(m){return m.value===sel.value;});if(hint)hint.textContent=foundModel?foundModel.hint:ANTHROPIC_MODELS[0].hint;
     sel.onchange=function(){
       var found=ANTHROPIC_MODELS.find(function(m){return m.value===sel.value;});
       if(hint)hint.textContent=found?found.hint:"";
@@ -1588,7 +1584,7 @@ async function siftWithAI(query,key){
       resp=await fetch("https://api.openai.com/v1/chat/completions",{
         method:"POST",
         headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},
-        body:JSON.stringify({model:S.profile.oaiModel||"gpt-4o",max_tokens:4000,messages:[{role:"user",content:prompt}]})
+        body:JSON.stringify({model:S.profile.oaiModel||"gpt-4o",max_tokens:8000,messages:[{role:"user",content:prompt}]})
       });
       if(!resp.ok){
         var err=await resp.json().catch(function(){return{};});
@@ -1602,7 +1598,7 @@ async function siftWithAI(query,key){
       resp=await fetch("https://api.anthropic.com/v1/messages",{
         method:"POST",
         headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-        body:JSON.stringify({model:S.profile.anthModel||"claude-sonnet-4-6",max_tokens:4000,messages:[{role:"user",content:prompt}]})
+        body:JSON.stringify({model:S.profile.anthModel||"claude-sonnet-4-6",max_tokens:8000,messages:[{role:"user",content:prompt}]})
       });
       if(!resp.ok){
         var err=await resp.json().catch(function(){return{};});
@@ -1632,9 +1628,25 @@ async function siftWithAI(query,key){
     updateFreeUsage(data.userRemaining,data.globalRemaining);
   }
   if(!text)return null;
-  var clean=text.replace(/```json|```/g,"").trim();
-  var parsed=JSON.parse(clean);
-  return Array.isArray(parsed)?parsed:[parsed];
+  // Strip markdown code fences
+  var clean=text.split("```json").join("").split("```").join("").trim();
+  // If truncated JSON, try to find the last complete object
+  if(clean[clean.length-1]!=="]"&&clean[clean.length-1]!=="}"){
+    // Try to close truncated array
+    var lastBrace=clean.lastIndexOf("},");
+    if(lastBrace>-1)clean=clean.substring(0,lastBrace+1)+"]";
+    else{var lb2=clean.lastIndexOf("}");if(lb2>-1)clean=clean.substring(0,lb2+1);}
+    // Ensure it's wrapped in array
+    if(clean[0]!=="[")clean="["+clean;
+    if(clean[clean.length-1]!=="]")clean=clean+"]";
+  }
+  try{
+    var parsed=JSON.parse(clean);
+    return Array.isArray(parsed)?parsed:[parsed];
+  }catch(e){
+    console.error("JSON parse failed:",e,"Raw:",clean.substring(0,200));
+    throw new Error("The AI returned invalid data. Try searching again.");
+  }
 }
 function doConnectorSearch(){
   var from=document.getElementById("conn-from");
