@@ -35,7 +35,7 @@ body.app-mode .topbar{flex-shrink:0;background:var(--card);border-bottom-color:v
 @keyframes dot-pop{0%,100%{transform:translateY(0) scale(1)}30%{transform:translateY(-4px) scale(1.18);color:var(--amber)}55%{transform:translateY(0) scale(1);color:var(--p)}}
 body.app-mode .logo{font-size:20px}
 .topbar-right{display:flex;align-items:center;gap:10px}
-body.app-mode .topbar-mid{flex:1;max-width:480px;margin:0 auto;display:none;gap:6px}
+.topbar-mid{display:none}.topbar-mid-conn{display:none}body.app-mode .topbar-mid{flex:1;max-width:480px;margin:0 auto;display:none;gap:6px}
 body.app-mode .topbar-mid.visible{display:flex}
 .app-sinput{flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;outline:none;background:var(--bg);color:var(--ink)}
 .app-sinput:focus{border-color:var(--p)}
@@ -151,10 +151,9 @@ body.app-mode .landing{display:none}
 .footer-hint{text-align:center;color:var(--muted);font-size:12px;padding-top:24px;border-top:1px solid var(--border)}
 
 /* FILTER DRAWER */
-.filter-drawer{display:none;position:fixed;top:56px;left:0;right:0;background:var(--card);border-bottom:2px solid var(--border);padding:14px 18px;z-index:200;box-shadow:0 4px 20px rgba(0,0,0,.12)}
-.filter-drawer.open{display:block}
-.filter-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
-.fgroup-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.filter-drawer{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:400;align-items:center;justify-content:center;background:rgba(0,0,0,.35)}.filter-drawer.open{display:flex}.filter-drawer-inner{background:var(--bg);border:1.5px solid var(--p);border-radius:16px;padding:24px 28px;max-width:660px;width:92%;box-shadow:0 8px 40px rgba(0,0,0,.18);position:relative;max-height:90vh;overflow-y:auto}
+.filter-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+.fgroup-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--pd);margin-bottom:6px}
 .frow{display:flex;gap:5px;flex-wrap:wrap}
 .fopt{padding:6px 11px;border:1.5px solid var(--border);border-radius:7px;background:var(--card);cursor:pointer;font-size:11px;font-weight:600;color:var(--muted);transition:all .15s;display:inline-flex;align-items:center;gap:4px;font-family:inherit}
 .fopt.on{border-color:var(--p);color:var(--pd);background:var(--ps)}
@@ -471,6 +470,51 @@ body:not(.app-mode) .main{display:none}
 .msg-style-btn:hover{border-color:var(--p);color:var(--pd)}
 .msg-style-btn.on{border-color:var(--p);background:var(--ps);color:var(--pd)}
 .p-note-label{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+
+@media(max-width:480px){
+  .hero h1{font-size:26px;line-height:1.2}
+  .hero p{font-size:14px}
+  .search-section{padding:24px 14px 20px}
+  .search-sub{font-size:13px}
+  .search-row{flex-direction:column;gap:8px}
+  .sinput-big{font-size:14px;padding:12px 14px}
+  .search-btn{width:100%;justify-content:center;padding:13px}
+  #landing-persona-row{gap:6px;justify-content:center}
+  .intent-btn{font-size:11px;padding:6px 10px}
+  .topbar{padding:0 12px;min-height:52px;gap:8px;overflow:hidden}
+  body.app-mode .topbar{padding:0 10px}
+  .logo{font-size:18px;flex-shrink:0}
+  #profile-name{display:none}
+  body.app-mode .topbar-mid.visible{min-width:0;flex:1}
+  .app-sinput{font-size:13px;min-width:0;width:100%}
+  .app-sbtn{padding:7px 10px;font-size:12px;white-space:nowrap;flex-shrink:0}
+  .filter-trigger{padding:6px 8px;font-size:11px}
+  .profile-btn{padding:4px 6px}
+  .profile-avatar{width:26px;height:26px;font-size:12px}
+  .modal{padding:18px 16px;border-radius:12px 12px 0 0;max-height:92vh;position:fixed;bottom:0;left:0;right:0;max-width:100%}
+  .modal-bg{align-items:flex-end}
+  .dtabs{gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .dtab{font-size:11px;padding:10px 10px;white-space:nowrap;flex-shrink:0}
+  body.app-mode .lpane-body{max-height:260px}
+  .result-card{padding:12px 14px}
+  .rc-name{font-size:14px}
+  .dscores{gap:10px}
+  .dscore-num{font-size:26px}
+  .dscore-lbl{font-size:9px}
+  .overview-grid{grid-template-columns:1fr}
+  .ov-card{padding:10px 12px}
+  .person-card{padding:12px 14px}
+  .project-card{padding:12px 14px}
+  .d-header{padding:14px 14px 0}
+  .dcontent{padding:12px 14px}
+  .filter-drawer-inner{padding:16px;width:94%}
+  #lg-geo-expand .lg-geo-inner{padding:6px 10px}
+  .section-h{font-size:10px}
+  .thesis-label{width:100px;font-size:9px}
+  .thesis-val{font-size:11px}
+  .needs-list li{font-size:11px}
+  .fb-label{width:100px;font-size:10px}
+}
 </style>
 </head>
 <body>
@@ -495,43 +539,57 @@ body:not(.app-mode) .main{display:none}
   </div>
 </div>
 
-<div id="filter-backdrop" style="display:none;position:fixed;inset:0;z-index:190" onclick="closeFilters()"></div>
-<div class="filter-drawer" id="filter-drawer">
-  <div class="filter-grid">
-    <div>
+<div class="filter-drawer" id="filter-drawer" onclick="handleFilterOverlayClick(event)">
+  <div class="filter-drawer-inner">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-family:'Fraunces',serif;font-size:17px;font-weight:600;color:var(--ink)">Filters</div>
+      <button onclick="closeFilters()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;padding:2px 8px">&times;</button>
+    </div>
+
+    <!-- Intent row -->
+    <div style="margin-bottom:18px">
       <div class="fgroup-label">Intent</div>
-      <div class="frow">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:7px">
         <div class="fopt" id="i-collab" onclick="selectPersona('collab')">&#128640; The Founder</div>
         <div class="fopt on" id="i-job" onclick="selectPersona('job')">&#127919; The Climber</div>
         <div class="fopt" id="i-network" onclick="selectPersona('network')">&#128302; The Connector</div>
       </div>
     </div>
-    <div>
+
+    <!-- Where to look — buttons + inline input on same row -->
+    <div style="margin-bottom:18px">
       <div class="fgroup-label">Where to look</div>
-      <div class="frow">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:7px">
         <div class="fopt" id="g-region" onclick="setGeo('region')">&#128205; Near Me</div>
         <div class="fopt" id="g-country" onclick="setGeo('country')">&#127988; My Country</div>
         <div class="fopt on" id="g-world" onclick="setGeo('world')">&#127758; Worldwide</div>
-      </div>
-      <div class="geo-input-mini" id="geo-input-mini">
-        <input id="geo-city" list="city-suggestions" placeholder="Type a city (e.g. Alpharetta, GA)" style="display:none">
-        <datalist id="city-suggestions">
-          <option value="Alpharetta, GA"><option value="Atlanta, GA"><option value="Austin, TX"><option value="Boston, MA"><option value="Brooklyn, NY"><option value="Cambridge, MA"><option value="Chicago, IL"><option value="Dallas, TX"><option value="Denver, CO"><option value="Houston, TX"><option value="Los Angeles, CA"><option value="Miami, FL"><option value="Minneapolis, MN"><option value="Nashville, TN"><option value="New York, NY"><option value="Oakland, CA"><option value="Palo Alto, CA"><option value="Philadelphia, PA"><option value="Pittsburgh, PA"><option value="Portland, OR"><option value="Raleigh, NC"><option value="San Diego, CA"><option value="San Francisco, CA"><option value="San Jose, CA"><option value="Santa Monica, CA"><option value="Seattle, WA"><option value="Washington, DC"><option value="Bengaluru, India"><option value="Mumbai, India"><option value="Delhi, India"><option value="Hyderabad, India"><option value="Pune, India"><option value="London, UK"><option value="Berlin, Germany"><option value="Toronto, Canada"><option value="Vancouver, Canada"><option value="Singapore"><option value="Tokyo, Japan"><option value="Sydney, Australia"><option value="Amsterdam, Netherlands"><option value="Paris, France"><option value="Dublin, Ireland"><option value="Tel Aviv, Israel">
-        </datalist>
-        <input id="geo-country-search" placeholder="Type a country..." list="country-suggestions" style="display:none">
-        <datalist id="country-suggestions">
-          <option value="United States"><option value="India"><option value="United Kingdom"><option value="Germany"><option value="Canada"><option value="Australia"><option value="France"><option value="Singapore"><option value="Netherlands"><option value="Brazil"><option value="Japan"><option value="South Korea"><option value="United Arab Emirates"><option value="Sweden"><option value="Israel"><option value="Spain"><option value="Italy"><option value="Switzerland"><option value="Denmark"><option value="Norway"><option value="Finland"><option value="Poland"><option value="Ireland"><option value="Mexico"><option value="Argentina"><option value="South Africa"><option value="Indonesia"><option value="Malaysia"><option value="Thailand"><option value="Vietnam"><option value="Philippines"><option value="Pakistan"><option value="Bangladesh">
-        </datalist>
-        <button class="geo-detect-btn" id="geo-detect-btn" onclick="detectLocation()" style="display:none">&#128205; Auto-detect</button>
+        <!-- Inline geo inputs — appear right of buttons -->
+        <div id="geo-input-mini" style="display:none;flex:1;min-width:180px;display:none">
+          <div style="display:flex;align-items:center;gap:7px;background:var(--card);border:1.5px solid var(--p);border-radius:9px;padding:6px 10px">
+            <input id="geo-city" list="city-suggestions" placeholder="Enter your city..." style="display:none;border:none;outline:none;font-size:13px;font-family:inherit;background:transparent;color:var(--ink);flex:1;min-width:0">
+            <input id="geo-country-search" list="country-suggestions" placeholder="Enter your country..." style="display:none;border:none;outline:none;font-size:13px;font-family:inherit;background:transparent;color:var(--ink);flex:1;min-width:0">
+            <button class="geo-detect-btn" id="geo-detect-btn" onclick="detectLocation()" style="display:none;padding:3px 9px;background:var(--ps);border:1px solid var(--p);border-radius:6px;font-size:11px;font-weight:600;color:var(--pd);cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">&#128205; Auto-detect</button>
+            <datalist id="city-suggestions">
+              <option value="Alpharetta, GA"><option value="Atlanta, GA"><option value="Austin, TX"><option value="Boston, MA"><option value="Brooklyn, NY"><option value="Cambridge, MA"><option value="Chicago, IL"><option value="Dallas, TX"><option value="Denver, CO"><option value="Houston, TX"><option value="Los Angeles, CA"><option value="Miami, FL"><option value="New York, NY"><option value="Palo Alto, CA"><option value="San Francisco, CA"><option value="San Jose, CA"><option value="Seattle, WA"><option value="Washington, DC"><option value="Bengaluru, India"><option value="Mumbai, India"><option value="London, UK"><option value="Berlin, Germany"><option value="Toronto, Canada"><option value="Singapore"><option value="Tokyo, Japan"><option value="Sydney, Australia">
+            </datalist>
+            <datalist id="country-suggestions">
+              <option value="United States"><option value="India"><option value="United Kingdom"><option value="Germany"><option value="Canada"><option value="Australia"><option value="France"><option value="Singapore"><option value="Netherlands"><option value="Brazil"><option value="Japan"><option value="South Korea"><option value="Israel"><option value="Sweden"><option value="Ireland"><option value="Mexico"><option value="Argentina"><option value="South Africa">
+            </datalist>
+          </div>
+        </div>
       </div>
     </div>
-    <div id="visa-group" style="display:none">
-      <div class="fgroup-label">Visa Filter</div>
-      <div class="frow">
+
+    <!-- Visa filter — full width row below -->
+    <div id="visa-group" style="display:none;padding-top:14px;border-top:1px solid var(--border)">
+      <div class="fgroup-label" style="margin-bottom:7px">Visa Filter</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <div class="fopt" id="visa-toggle" onclick="toggleVisa()"><span id="visa-check">&#9744;</span> H1B Sponsors Only</div>
+        <div class="visa-note-mini" style="margin:0">Active for US markets · <span style="color:var(--terra-deep);font-weight:600">Expanding soon</span></div>
       </div>
-      <div class="visa-note-mini">Active for US markets · <span style="color:var(--terra-deep);font-weight:600">Expanding soon</span></div>
     </div>
+
   </div>
 </div>
 
@@ -748,12 +806,36 @@ body:not(.app-mode) .main{display:none}
   </div>
 </div>
 
+<!-- Contact footer -->
+<div style="text-align:center;padding:20px 24px 32px;font-size:12px;color:var(--muted);line-height:1.8">
+  Built by <strong style="color:var(--ink)">Anjali Baheti</strong> — backend engineer exploring what opportunity discovery could look like.<br>
+  Questions, feedback, or just want to say hi?
+  <a href="https://www.linkedin.com/in/anjalibaheti" target="_blank" style="color:var(--pd);font-weight:600;margin-left:4px">Ping me on LinkedIn &#8599;</a>
+</div>
+
 <div class="modal-bg" id="settings-modal" onclick="if(event.target===this)closeSettings()">
   <div class="modal">
     <div class="modal-title serif" id="settings-title">Your Profile &amp; Setup</div>
     <div class="modal-sub" id="settings-sub">Your bio personalizes every search. Your API key never leaves your browser.</div>
-    <div class="modal-section"><label class="modal-label">Your name</label><input id="setting-name" type="text" placeholder="e.g. Anjali Baheti"></div>
-    <div class="modal-section"><label class="modal-label">Your bio</label><textarea id="setting-bio" placeholder="e.g. Backend engineer, 4 years at Movius. Built data pipelines, AI integrations. Open to opportunities in climate tech and AI infrastructure."></textarea><div class="modal-hint">Or paste your LinkedIn URL &mdash; we will read it from there in the real product.</div></div>
+    <div class="modal-section">
+      <label class="modal-label">Your name</label>
+      <input id="setting-name" type="text" placeholder="e.g. Anjali Baheti">
+    </div>
+    <div class="modal-section">
+      <label class="modal-label">Your background</label>
+      <textarea id="setting-bio" rows="4" placeholder="e.g. Backend engineer with 4 years building data pipelines and AI integrations. Solved real-time latency problems in voice infrastructure. Curious about climate tech and AI tooling for developers."></textarea>
+      <div style="margin-top:6px">
+        <input id="setting-li" type="url" placeholder="LinkedIn URL (optional)" style="width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;outline:none;background:var(--card);color:var(--ink);margin-bottom:6px">
+      </div>
+      <div style="margin-top:2px">
+        <span onclick="toggleBioPrompt()" style="font-size:11px;color:var(--pd);font-weight:600;cursor:pointer;user-select:none" id="bio-prompt-toggle">💡 Not sure what to write? <span id="bio-prompt-chevron">▼</span></span>
+        <div id="bio-prompt-box" style="display:none;margin-top:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--ink2);line-height:1.6">
+          <div style="margin-bottom:6px">Run this in ChatGPT or Claude, then paste the result into the background box above:</div>
+          <div id="bio-prompt-text" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-style:italic;color:var(--ink);line-height:1.65;font-size:11px">"Describe my professional background in 2-3 lines for a professional opportunity discovery tool. Include: what I build or have built, the kind of problems I solve, my industry experience, and what I am genuinely curious about exploring next — whether that is a new domain, a type of company, or a problem space. Return only the 2-3 lines, no intro."</div>
+          <button onclick="copyBioPrompt()" id="bio-prompt-copy-btn" style="margin-top:7px;padding:5px 12px;background:var(--ps);border:1px solid var(--p);border-radius:6px;font-size:11px;font-weight:700;color:var(--pd);cursor:pointer;font-family:inherit">Copy prompt</button>
+        </div>
+      </div>
+    </div>
     <div class="modal-section">
       <label class="modal-label">API Key (free)</label>
       <div style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:10px;font-size:12px;line-height:1.7;color:var(--ink2)">
@@ -819,7 +901,7 @@ body:not(.app-mode) .main{display:none}
 
 <script>
 // ── STATE ──
-var S={intent:"job",geo:"world",visa:false,sort:"fit",mode:"domain",query:"",currentCo:null,currentPeople:[],filtersOpen:false,aiResults:null,usingAI:false,profile:{name:"",bio:"",key:"",anthModel:"claude-sonnet-4-6",oaiModel:"gpt-4o"}};
+var S={intent:"job",geo:"world",visa:false,sort:"fit",mode:"domain",query:"",currentCo:null,currentPeople:[],filtersOpen:false,aiResults:null,usingAI:false,profile:{name:"",bio:"",li:"",key:"",anthModel:"claude-sonnet-4-6",oaiModel:"gpt-4o"}};
 
 // ── TRANSITION DATA ──
 var transitionData={
@@ -1234,8 +1316,9 @@ function selectPersona(intent,silent){
 
 // ── FILTER / MODE ──
 function setMode(m){S.mode=m;document.getElementById("m-domain").classList.toggle("on",m==="domain");document.getElementById("m-company").classList.toggle("on",m==="company");document.getElementById("sq").placeholder=m==="domain"?"e.g. climate software, AI infrastructure, fintech spend...":"Enter company name (e.g. Anthropic, Cursor, Watershed)";var ex=document.getElementById("examples-list");if(m==="domain"){ex.innerHTML='<span class="etag" onclick="fillAndSearch(\'sustainable environment\')">sustainable environment</span><span class="etag" onclick="fillAndSearch(\'AI infrastructure\')">AI infrastructure</span><span class="etag" onclick="fillAndSearch(\'developer tools\')">developer tools</span><span class="etag" onclick="fillAndSearch(\'healthcare AI\')">healthcare AI</span><span class="etag" onclick="fillAndSearch(\'fintech spend\')">fintech spend</span>';}else{ex.innerHTML='<span class="etag" onclick="fillAndSearch(\'Anthropic\')">Anthropic</span><span class="etag" onclick="fillAndSearch(\'Cursor\')">Cursor</span><span class="etag" onclick="fillAndSearch(\'Watershed\')">Watershed</span><span class="etag" onclick="fillAndSearch(\'Ramp\')">Ramp</span>';}saveS();}
-function toggleFilters(){S.filtersOpen=!S.filtersOpen;document.getElementById("filter-drawer").classList.toggle("open",S.filtersOpen);var bd=document.getElementById("filter-backdrop");if(bd)bd.style.display=S.filtersOpen?"block":"none";}
-function closeFilters(){S.filtersOpen=false;document.getElementById("filter-drawer").classList.remove("open");var bd=document.getElementById("filter-backdrop");if(bd)bd.style.display="none";}
+function toggleFilters(){S.filtersOpen=!S.filtersOpen;document.getElementById("filter-drawer").classList.toggle("open",S.filtersOpen);}
+function closeFilters(){S.filtersOpen=false;document.getElementById("filter-drawer").classList.remove("open");}
+function handleFilterOverlayClick(e){if(e.target===document.getElementById("filter-drawer"))closeFilters();}
 function updateFilterCount(){var c=0;if(S.intent!=="job")c++;if(S.geo!=="world")c++;if(S.visa)c++;document.getElementById("filter-count").textContent=c;document.getElementById("filter-trigger").classList.toggle("has-filters",c>0);}
 function setIntent(v){var _prevIntent=S.intent;S.intent=v;["collab","job","network"].forEach(function(k){var el=document.getElementById("i-"+k);if(el)el.classList.toggle("on",k===v)});document.getElementById("visa-group").style.display=v==="job"?"block":"none";if(v!=="job"){S.visa=false;document.getElementById("visa-check").innerHTML="&#9744;";document.getElementById("visa-toggle").classList.remove("on");}updateFilterCount();saveS();if(S.query)buildResults();
   if(_prevIntent!==v&&document.body.classList.contains("app-mode")&&S.currentCo){
@@ -1251,9 +1334,9 @@ function setGeo(v){
   // Sync filter-drawer geo buttons
   ["region","country","world"].forEach(function(k){var el=document.getElementById("g-"+k);if(el)el.classList.toggle("on",k===v)});
   // Filter-drawer geo input
-  var w=document.getElementById("geo-input-mini");if(w)w.style.display=(v==="region"||v==="country")?"block":"none";
+  var w=document.getElementById("geo-input-mini");if(w)w.style.display=(v==="region"||v==="country")?"flex":"none";
   var city=document.getElementById("geo-city");var country=document.getElementById("geo-country-search");var btn=document.getElementById("geo-detect-btn");
-  if(city)city.style.display=v==="region"?"block":"none";if(country)country.style.display=v==="country"?"block":"none";if(btn)btn.style.display=v==="region"?"inline-block":"none";
+  if(city)city.style.display=v==="region"?"block":"none";if(country)country.style.display=v==="country"?"block":"none";if(btn)btn.style.display=v==="region"?"inline-block":"none";if(btn){btn.style.visibility=v==="region"?"visible":"hidden";btn.style.display="inline-block";}
   if(v==="region"&&city&&!city.value)detectLocation();
   // Landing inline geo expand
   var lgExpand=document.getElementById("lg-geo-expand");
@@ -1263,7 +1346,7 @@ function setGeo(v){
   if(lgExpand){lgExpand.classList.toggle("open",v==="region"||v==="country");}
   if(lgCity){lgCity.style.display=v==="region"?"block":"none";}
   if(lgCountry){lgCountry.style.display=v==="country"?"block":"none";}
-  if(lgDetect){lgDetect.style.display=v==="region"?"inline-block":"none";}
+  if(lgDetect){lgDetect.style.display="inline-block";lgDetect.style.visibility=v==="region"?"visible":"hidden";}
   if(v==="region"&&lgCity&&!lgCity.value)detectLocationLanding();
   updateFilterCount();saveS();if(S.query)buildResults();
 }
@@ -1276,12 +1359,19 @@ function toggleVisa(){S.visa=!S.visa;document.getElementById("visa-check").inner
   }
 }
 function setSort(v){S.sort=v;saveS();if(S.query)buildResults();}
-function openSettings(){document.getElementById("setting-name").value=S.profile.name||"";document.getElementById("setting-bio").value=S.profile.bio||"";document.getElementById("setting-key").value=S.profile.key||"";
+function openSettings(){
+  document.getElementById("setting-name").value=S.profile.name||"";
+  // If bio matches old default, show as empty so placeholder appears
+  var oldDefaults=["Backend & AI Engineer with 4 years","Sr. Software Engineer at Movius building data pipelines","open to opportunities"];
+  var bio=S.profile.bio||"";
+  var isOldDefault=oldDefaults.some(function(d){return bio.indexOf(d)>-1;});
+  document.getElementById("setting-bio").value=isOldDefault?"":bio;
+  document.getElementById("setting-key").value=S.profile.key||"";var liEl=document.getElementById("setting-li");if(liEl)liEl.value=S.profile.li||"";
   var keyVal=S.profile.key||"";
   setTimeout(function(){detectKeyProvider(keyVal);},50);
   document.getElementById("settings-modal").classList.add("open");}
 function closeSettings(){document.getElementById("settings-modal").classList.remove("open");}
-function saveSettings(){S.profile.name=document.getElementById("setting-name").value.trim();S.profile.bio=document.getElementById("setting-bio").value.trim();S.profile.key=document.getElementById("setting-key").value.trim();
+function saveSettings(){S.profile.name=document.getElementById("setting-name").value.trim();S.profile.bio=document.getElementById("setting-bio").value.trim();S.profile.li=document.getElementById("setting-li")?document.getElementById("setting-li").value.trim():"";S.profile.key=document.getElementById("setting-key").value.trim();
   var sel=document.getElementById("model-select");
   var key=S.profile.key;
   if(sel&&sel.value){
@@ -1422,6 +1512,31 @@ function detectKeyProvider(val){
     if(oaiInstr)oaiInstr.style.display="none";
     if(selectorWrap)selectorWrap.style.display="none";
   }
+}
+function toggleBioPrompt(){
+  var box=document.getElementById("bio-prompt-box");
+  var chev=document.getElementById("bio-prompt-chevron");
+  var open=box.style.display==="none";
+  box.style.display=open?"block":"none";
+  chev.textContent=open?"▲":"▼";
+}
+function copyBioPrompt(){
+  var text=document.getElementById("bio-prompt-text").textContent;
+  var btn=document.getElementById("bio-prompt-copy-btn");
+  navigator.clipboard.writeText(text).then(function(){
+    btn.textContent="Copied!";
+    setTimeout(function(){btn.textContent="Copy prompt";},2000);
+  }).catch(function(){
+    // Fallback
+    var ta=document.createElement("textarea");
+    ta.value=text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    btn.textContent="Copied!";
+    setTimeout(function(){btn.textContent="Copy prompt";},2000);
+  });
 }
 function showToast(msg){
   var t=document.getElementById("sift-toast");
