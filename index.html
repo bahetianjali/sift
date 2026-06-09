@@ -1863,6 +1863,7 @@ function buildResults(){
   if(sorted.length===0){cos.innerHTML+='<div style="padding:30px 14px;text-align:center;color:var(--muted);font-size:12px">No companies match this filter.</div>';return;}
   var src=S.usingAI&&S.aiResults&&S.aiResults.length>0?S.aiResults:companies;
   sorted.forEach(function(c){
+  if(c.meta)c.meta=c.meta.split("\n").join(" · ").split("\r").join("").split("|").join(" · ").replace(/  +/g," ").trim();
     var idx=src.indexOf(c);
     var active=S.currentCo===c?" active":"";
     var hb=c.hiring==="active"?'<span class="badge b-hiring">&#9679; Hiring</span>':c.hiring==="selective"?'<span class="badge b-selective">&#9680; Selective</span>':'<span class="badge b-collab">&#129309; Collab</span>';
@@ -1883,7 +1884,13 @@ function switchLtab(t){document.getElementById("ltab-cos").classList.toggle("on"
 
 function openCompany(idx){
   var src=(S.usingAI&&S.aiResults&&S.aiResults.length>0)?S.aiResults:companies;
-  var c=src[idx];if(!c)return;S.currentCo=c;
+  var c=src[idx];if(!c)return;
+  // Normalize meta field — AI sometimes returns newlines or pipes instead of ·
+  if(c.meta)c.meta=c.meta.split("\n").join(" · ").split("\r").join("").split("|").join(" · ").replace(/  +/g," ").trim();
+
+  // Normalize tags
+  if(c.tags&&!Array.isArray(c.tags))c.tags=[c.tags];
+  S.currentCo=c;
   document.getElementById("dcname").textContent=c.name;
   document.getElementById("dcmeta").textContent=c.meta;
   document.getElementById("dscores").innerHTML='<div class="dscore f" onclick="toggleFitBreakdown()" style="cursor:pointer" title="See breakdown"><div class="dscore-num">'+c.fit+'</div><div class="dscore-lbl">Fit &#9660;</div></div><div class="dscore o"><div class="dscore-num">'+c.opportunity+'</div><div class="dscore-lbl">Why Now</div></div><div class="dscore r"><div class="dscore-num">'+c.outreach+'</div><div class="dscore-lbl">Reach</div></div>';
@@ -2012,7 +2019,7 @@ function buildPeople(c){if(!c.people||!c.people.length){document.getElementById(
     var defaultStyle="curious";
     var stylesHtml=hasNotes?'<div class="msg-styles">'+Object.keys(styleLabels).filter(function(k){return p.notes[k];}).map(function(k){return'<button class="msg-style-btn'+(k===defaultStyle?" on":"")+'" data-nid="'+nid+'" data-style="'+k+'" onclick="switchMsgStyle(this)">'+styleLabels[k]+'</button>';}).join("")+'</div>':"";
     var defaultNote=hasNotes?(p.notes[defaultStyle]||p.notes[Object.keys(p.notes)[0]]):(p.note||p.why||"");
-    return'<div class="person-card"><div class="person-main"><div class="p-avatar '+(p.avColor||"terra")+'">'+p.name.charAt(0)+'</div><div class="p-info"><div class="p-row1"><div class="p-name">'+p.name+'</div><span class="p-tag '+p.tag+'">'+p.tagLabel+'</span></div><div class="p-role">'+p.role+'</div><div class="p-why-row"><div class="p-why">'+p.why+'</div>'+confHtml+'</div>'+confSrcHtml+'<div class="p-links"><a class="plink" href="https://'+p.li+'" target="_blank">LinkedIn</a>'+xLink+'</div></div></div><button class="p-expand-btn" data-nid="'+nid+'" onclick="toggleNote(this.dataset.nid,this)">&#9662; Suggested first message</button><div class="p-note" id="'+nid+'"><span class="p-channel-tag">Best channel: '+p.channelLabel+'</span>'+stylesHtml+'<div class="p-note-label">Message</div><div class="p-note-text" id="'+nid+'-text">'+defaultNote+'</div>'+(hasNotes?'<div id="'+nid+'-data" style="display:none">'+JSON.stringify(p.notes)+'</div>':'')+'<div class="btn-row"><button class="cpybtn" onclick="cpNote(this)">Copy</button><button class="cpybtn alt" onclick="showLinkedInSend('+i+')">&#128279; LinkedIn</button></div></div></div>';
+    var pName=p.name||"Unknown";var pRole=p.role||"";var pWhy=p.why||"";var pLi=p.li||"linkedin.com";var pTag=p.tag||"tag-founder";var pTagLabel=p.tagLabel||"Team";var pChannel=p.channelLabel||"Email";return'<div class="person-card"><div class="person-main"><div class="p-avatar '+(p.avColor||"terra")+'">'+pName.charAt(0)+'</div><div class="p-info"><div class="p-row1"><div class="p-name">'+pName+'</div><span class="p-tag '+pTag+'">'+pTagLabel+'</span></div><div class="p-role">'+pRole+'</div><div class="p-why-row"><div class="p-why">'+pWhy+'</div>'+confHtml+'</div>'+confSrcHtml+'<div class="p-links"><a class="plink" href="https://'+pLi+'" target="_blank">LinkedIn</a>'+xLink+'</div></div></div><button class="p-expand-btn" data-nid="'+nid+'" onclick="toggleNote(this.dataset.nid,this)">&#9662; Suggested first message</button><div class="p-note" id="'+nid+'"><span class="p-channel-tag">Best channel: '+p.channelLabel+'</span>'+stylesHtml+'<div class="p-note-label">Message</div><div class="p-note-text" id="'+nid+'-text">'+defaultNote+'</div>'+(hasNotes?'<div id="'+nid+'-data" style="display:none">'+JSON.stringify(p.notes)+'</div>':'')+'<div class="btn-row"><button class="cpybtn" onclick="cpNote(this)">Copy</button><button class="cpybtn alt" onclick="showLinkedInSend('+i+')">&#128279; LinkedIn</button></div></div></div>';
   }).join("");
   var gmailBase="https://mail.google.com/mail/?view=cm&fs=1&to=";
   var sub1=encodeURIComponent("On "+c.name);
