@@ -1220,7 +1220,7 @@ function selectPersona(intent,silent){
         if(ssi)ssi.innerHTML='<div style="max-width:400px;text-align:center">'
           +'<div style="font-size:30px;margin-bottom:12px">&#127754;</div>'
           +'<div style="font-family:Fraunces,serif;font-size:17px;font-weight:600;color:var(--ink);margin-bottom:10px">Switched to The Connector</div>'
-          +'<div style="font-size:13px;color:var(--ink2);line-height:1.65;margin-bottom:14px">Use the search bar above to enter your destination role and map your transition.</div>'
+          +'<div style="font-size:13px;color:var(--ink2);line-height:1.65;margin-bottom:14px">Enter the role you want to transition <em>to</em> in the search bar above, then click Map.</div>'
           +'<div style="background:var(--ps);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--pd)">&#8593; Type a destination role above and tap Map</div>'
           +'</div>';
       }
@@ -1244,6 +1244,22 @@ function selectPersona(intent,silent){
       if(sS2)sS2.style.display="";
       if(lH2)lH2.style.display="";
       if(ltC2){var coEl=document.getElementById("cocount");ltC2.innerHTML='&#127968; Companies (<span id="cocount">'+(coEl?coEl.textContent:"0")+'</span>)';}
+      // Coming from Connector — no company results, prompt for domain search
+      if(prevIntent==="network"&&!S.query){
+        var nudge=document.getElementById("profile-nudge");
+        if(nudge){
+          nudge.innerHTML="&#128269; You switched to <strong>"+{"collab":"The Founder","job":"The Climber"}[intent]+"</strong>. Search a domain or company name above to get started.";
+          nudge.style.display="block";
+          // Return to landing if in app mode with no results
+          if(!S.query){
+            document.body.classList.remove("app-mode");
+            var landingEl=document.getElementById("landing");
+            var appEl=document.getElementById("app-view");
+            if(landingEl)landingEl.style.display="";
+            if(appEl)appEl.style.display="none";
+          }
+        }
+      }
       // Re-search with new persona if AI-powered results exist
       if(S.query&&S.profile.key&&(S.usingAI||S.aiResults)){
         var intentNames={collab:"The Founder",job:"The Climber"};
@@ -1746,6 +1762,11 @@ function openConnectorDeepDive(from,to){
     // Generate transition data via AI
     document.getElementById("loading").style.display="flex";
     document.getElementById("ltext").textContent="Mapping "+from+" to "+to+"...";
+    // Show loading in each tab panel
+    ["d-skill","d-plan","d-proof","d-people","d-community"].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el)el.innerHTML='<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">Generating '+id.replace("d-","")+'...</div>';
+    });
     var bio2=S.profile.bio||"Backend engineer";
     var tprompt='Return ONLY a JSON object, no markdown. Map a career transition from "'+from+'" to "'+to+'" for someone with this background: '+bio2+'. Return: {"readiness":65,"skillGaps":[{"skill":"Skill name","gap":"high|medium|low","action":"Specific action to close this gap","timeWeeks":4}],"thirtyDayPlan":[{"week":1,"action":"Specific action","outcome":"What this proves"}],"projects":[{"title":"Project title","weekends":2,"why":"Why this matters for the transition","outcome":"What it demonstrates"}],"peopleLikeYou":[{"path":"Their transition path in 1 sentence","time":"How long it took","firstRole":"Their first role in new field"}],"communities":["Community name and why"]}. Include 3-4 items per array.';
     siftAICall(tprompt,key).then(function(result){
@@ -1755,7 +1776,7 @@ function openConnectorDeepDive(from,to){
         var td=JSON.parse(result.split("```json").join("").split("```").join("").trim());
         // Store and render
         S.currentTransition=td;
-        document.getElementById("readiness-score").textContent=td.readiness||65;
+        // readiness shown in score badge via renderTransition
         renderTransitionTab("skill-gap",td);
       }catch(e){console.error("Transition parse error",e);}
     }).catch(function(e){document.getElementById("loading").style.display="none";console.error(e);});
@@ -1965,7 +1986,7 @@ function renderTransitionTab(tab,td){
   if(!td)return;
   var el=document.getElementById("d-skilgap")||document.querySelector("[data-tab='skill-gap']");
   // Skill gap
-  var sgEl=document.getElementById("d-skillgap");
+  var sgEl=document.getElementById("d-skill");
   if(sgEl&&td.skillGaps){
     sgEl.innerHTML='<div class="lvlup-intro">Skills to build for this transition.</div>'+(td.skillGaps||[]).map(function(s){
       var col=s.gap==="high"?"#E53935":s.gap==="medium"?"#FB8C00":"#43A047";
@@ -1973,32 +1994,86 @@ function renderTransitionTab(tab,td){
     }).join("");
   }
   // 30-day plan
-  var planEl=document.getElementById("d-30day");
+  var planEl=document.getElementById("d-plan");
   if(planEl&&td.thirtyDayPlan){
     planEl.innerHTML=(td.thirtyDayPlan||[]).map(function(w){
       return'<div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start"><div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--ps);border:2px solid var(--p);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--pd)">W'+w.week+'</div><div><div style="font-size:13px;color:var(--ink);font-weight:600;margin-bottom:3px">'+w.action+'</div><div style="font-size:11px;color:var(--muted)">'+w.outcome+'</div></div></div>';
     }).join("");
   }
   // Projects
-  var projEl=document.getElementById("d-buildproof");
+  var projEl=document.getElementById("d-proof");
   if(projEl&&td.projects){
     projEl.innerHTML=(td.projects||[]).map(function(p){
       return'<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px"><div style="font-weight:700;font-size:13px;color:var(--ink);margin-bottom:4px">'+p.title+'</div><div style="font-size:12px;color:var(--ink2);margin-bottom:6px">'+p.why+'</div><div style="font-size:11px;color:var(--pd);font-weight:600">'+p.outcome+'</div></div>';
     }).join("");
   }
   // People like you
-  var pplEl=document.getElementById("d-peoplelikeyou");
+  var pplEl=document.getElementById("d-people");
   if(pplEl&&td.peopleLikeYou){
     pplEl.innerHTML=(td.peopleLikeYou||[]).map(function(p){
       return'<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px"><div style="font-size:13px;color:var(--ink);margin-bottom:4px">'+p.path+'</div><div style="display:flex;gap:12px"><span style="font-size:11px;color:var(--muted)">Time: '+p.time+'</span><span style="font-size:11px;color:var(--pd);font-weight:600">First role: '+p.firstRole+'</span></div></div>';
     }).join("");
   }
   // Communities
-  var commEl=document.getElementById("d-communities");
+  var commEl=document.getElementById("d-community");
   if(commEl&&td.communities){
     commEl.innerHTML=(td.communities||[]).map(function(c){
       return'<div style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;color:var(--ink)">&#128101; '+c+'</div>';
     }).join("");
+  }
+}
+async function fetchCompanyDetail(c){
+  var key=S.profile.key;
+  if(!key||c._detailFetching||c._detailFetched)return;
+  c._detailFetching=true;
+  var bio=S.profile.bio||"Backend engineer";
+  var domain=c.brief&&c.brief.Domain?c.brief.Domain:c.name;
+  var sysMsg="You are Sift. Return ONLY valid JSON, no markdown. Research the company at domain: "+domain+". Use this domain as the source of truth for finding real people.";
+  var prompt=sysMsg+" User background: "+bio+". Return a JSON object (not array) with these fields only: signals (array of 2-3 signal objects: type,icon,iconClass,typeClass,title,detail,impact,date), contact (email string), contactConf (verified|public|guess), li (linkedin url), x (null or @handle), people (array of 3 person objects: name,role,tag,tagLabel,avColor,why,whyConf,whyConfSource,channel,channelLabel,li,x,notes{curious,technical},intent), levelUp (array of 2 project objects: title,weekends,why,capabilities array of 3,stack,outcome), email (cold email text), followup (short followup text), opportunityReason (2-3 sentences on why now).";
+  try{
+    var text=await siftAICall(prompt,key);
+    if(!text)return;
+    var clean=text.split("```json").join("").split("```").join("").trim();
+    var detail=JSON.parse(clean);
+    // Merge detail into company object
+    if(detail.people&&detail.people.length)c.people=detail.people.map?detail.people.filter(Boolean):[];
+    if(detail.levelUp&&detail.levelUp.length)c.levelUp=Array.isArray(detail.levelUp)?detail.levelUp:[];
+    if(detail.signals&&detail.signals.length)c.signals=Array.isArray(detail.signals)?detail.signals:[];
+    if(detail.email)c.email=detail.email;
+    if(detail.followup)c.followup=detail.followup;
+    if(detail.contact)c.contact=detail.contact;
+    if(detail.contactConf)c.contactConf=detail.contactConf;
+    if(detail.opportunityReason)c.opportunityReason=detail.opportunityReason;
+    c=normalizeCompany(c);
+    c._detailFetched=true;
+    c._detailFetching=false;
+    // Re-render if this company is still open
+    if(S.currentCo===c||S.currentCo&&S.currentCo.name===c.name){
+      buildPeople(c);
+      buildSignals(c);
+      if(S.intent==="job")buildLevelUp(c);
+    }
+  }catch(e){
+    c._detailFetching=false;
+    console.error("fetchCompanyDetail error:",e);
+    var el=document.getElementById("d-people");
+    if(el&&el.innerHTML.indexOf("Loading")>-1)el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Could not load people data. Try again.</div>';
+  }
+}
+function switchToResearch(companyName){
+  // Switch to company research mode and pre-fill the search
+  setMode("company");
+  var sq=document.getElementById("sq");
+  if(sq)sq.value=companyName;
+  // Return to landing
+  document.body.classList.remove("app-mode");
+  document.getElementById("landing").style.display="";
+  document.getElementById("app-view").style.display="none";
+  // Show a prompt nudge
+  var nudge=document.getElementById("profile-nudge");
+  if(nudge){
+    nudge.innerHTML="&#128270; Now in <strong>Research a Company</strong> mode. Search <strong>"+companyName+"</strong>'s domain (e.g. temporal.io) for the full deep dive.";
+    nudge.style.display="block";
   }
 }
 function normalizeCompany(c){
@@ -2201,9 +2276,12 @@ function toggleFitBreakdown(){
 }
 function buildSignals(c){
   var feed=(Array.isArray(c.signals)?c.signals:[]).filter(function(s){return s&&s.title;}).map(function(s){return'<div class="signal-card"><div class="signal-icon '+(s.iconClass||'sig-product')+'">'+s.icon+'</div><div style="flex:1"><div class="signal-type '+(s.typeClass||'type-product')+'">'+((s.type||'update').toUpperCase())+'</div><div class="signal-title">'+s.title+'</div><div class="signal-detail">'+s.detail+'</div><div class="signal-impact">'+s.impact+'</div><div class="signal-date">'+s.date+'</div></div></div>';}).join("");
-  document.getElementById("d-signals").innerHTML='<div class="why-now-score"><div class="why-num">'+c.opportunity+'</div><div><div class="why-label">Why Now Score</div><div class="why-desc">'+c.opportunityReason+'</div></div></div>'+feed;
+  var oppReason=c.opportunityReason||c.whyShort||"";document.getElementById("d-signals").innerHTML='<div class="why-now-score"><div class="why-num">'+c.opportunity+'</div><div><div class="why-label">Why Now Score</div><div class="why-desc">'+oppReason+'</div></div></div>'+feed;
 }
-function buildPeople(c){if(!c.people||!c.people.length){document.getElementById("d-people").innerHTML='<div style="color:var(--muted);font-size:13px;padding:20px 0">No people data available for this company.</div>';return;}
+function buildPeople(c){if(!c.people||!c.people.length){
+    document.getElementById("d-people").innerHTML='<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px"><div style="font-size:20px;margin-bottom:10px">&#128101;</div>Loading people...</div>';
+    fetchCompanyDetail(c);
+    return;}
   S.currentPeople=(Array.isArray(c.people)?c.people:[]).filter(function(p){if(!p)return false;var intent=Array.isArray(p.intent)?p.intent:(p.intent?[p.intent]:["collab","job","network"]);if(S.intent==="collab")return intent.indexOf("collab")>-1;if(S.intent==="job")return intent.indexOf("job")>-1||intent.indexOf("collab")>-1;return true;});
   var label=S.intent==="collab"?"Founders & Peers to Reach":S.intent==="job"?"People to Reach for Roles":"People in This Domain";
   var warning='<div style="background:#FFF8E1;border:1px solid #FFD54F;border-radius:8px;padding:9px 12px;font-size:11px;color:#795548;line-height:1.55;margin-bottom:12px">&#9888; <strong>Unverified contacts:</strong> Email addresses and handles are pattern guesses based on naming conventions, not confirmed. Verify before sending.</div>';
@@ -2243,7 +2321,9 @@ function buildLevelUp(c){
   }
   return'<div class="project-card"><div class="project-header"><div class="project-num">'+(i+1)+'</div><div class="project-title">'+p.title+'</div><div class="project-weekend">'+p.weekends+' weekend'+(p.weekends>1?"s":"")+'</div></div><div class="project-why">'+p.why+'</div>'+capsHtml+'<div class="project-meta"><div class="pm-item"><div class="pm-label">Stack</div><div class="pm-val">'+p.stack+'</div></div><div class="pm-item"><div class="pm-label">Effort</div><div class="pm-val">'+p.weekends+' weekend'+(p.weekends>1?"s":"")+'</div></div></div><div class="project-outcome">'+p.outcome+'</div></div>';
 }).join("");
-  document.getElementById("d-levelup").innerHTML=intro+(projs||'<div style="color:var(--muted);font-size:13px;padding:12px 0">No Level Up projects returned for this company. Try searching again.</div>');
+  if(!projs&&(!c.levelUp||!c.levelUp.length)){
+    document.getElementById("d-levelup").innerHTML=intro+'<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px"><div style="font-size:20px;margin-bottom:10px">&#127881;</div>Loading projects...</div>';
+  }else{document.getElementById("d-levelup").innerHTML=intro+projs;}
 }
 
 function switchMsgStyle(btn){
