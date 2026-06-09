@@ -1402,7 +1402,7 @@ function doSearch(){
     // No profile/key — if demo match exists use it, otherwise prompt
     if(demoMatch.length>0){
       document.getElementById("loading").style.display="flex";
-      document.getElementById("ltext").textContent="Loading demo data...";
+      document.getElementById("ltext").textContent="Finding matches...";
       setTimeout(function(){
         document.getElementById("loading").style.display="none";
         enterAppMode(false);buildResults();
@@ -1570,10 +1570,30 @@ function showKeyPrompt(){
 async function siftWithAI(query,key){
   var isCompany=S.mode==="company";
   var bio=S.profile.bio||"Backend engineer, 4 years experience in data pipelines and AI integrations.";
+  var EXAMPLE_COMPANY={
+    "name":"Acme Corp","meta":"San Francisco · Series B · $40M raised · ~80 people",
+    "desc":"One sentence describing what they build and for whom.",
+    "tags":["AI Infrastructure","Developer Tools"],
+    "fit":85,"fitBreakdown":{"domain":88,"technical":90,"stage":80,"network":70,"experience":85},
+    "opportunity":78,"outreach":72,"hiring":"active","visaSponsors":true,
+    "brief":{"Company":"Acme Corp","Domain":"acmecorp.com","Stage":"Series B","Raised":"$40M","Team":"~80","Problem":"The core problem they solve in one sentence","Bet":"What market shift they are betting on","Winning":"Why they are winning right now","Struggling":"Where they are struggling right now"},
+    "needs":["Specific need 1","Specific need 2","Specific need 3","Specific need 4"],
+    "fitReason":"1-2 sentences on exactly why user background matches this company.",
+    "whyShort":"Under 15 words on why now is the moment.",
+    "opportunityReason":"2-3 sentences on the opportunity for the user.",
+    "signals":[{"type":"hiring","icon":"&#128101;","iconClass":"sig-hiring","typeClass":"type-hiring","title":"Actively hiring backend engineers","detail":"Posted 8 roles in last 30 days","impact":"Team is scaling fast","date":"Jun 2026"},{"type":"funding","icon":"&#128176;","iconClass":"sig-funding","typeClass":"type-funding","title":"Series B closed","detail":"$40M led by Sequoia","impact":"18 months of runway","date":"Apr 2026"}],
+    "contact":"firstname@acmecorp.com","contactConf":"pattern guess",
+    "li":"linkedin.com/in/foundername","x":"@foundername",
+    "people":[{"name":"Jane Smith","role":"CEO, Co-founder","tag":"tag-founder","tagLabel":"Founder","avColor":"terra","why":"Building the company vision, will respond to relevant technical outreach","whyConf":"high","whyConfSource":"Publicly identified founder","channel":"email","channelLabel":"Email","li":"linkedin.com/in/janesmith","x":"@janesmith","notes":{"curious":"Hi Jane, I work on data pipelines at Movius and noticed Acme is solving a similar problem. Would love to hear how you think about it.","technical":"Hi Jane, I build multi-source ingestion systems. The schema drift problem you face maps closely to what I work on. Happy to share notes."},"intent":["collab","job"]},{"name":"Bob Lee","role":"Head of Engineering","tag":"tag-hiring","tagLabel":"Hiring","avColor":"indigo","why":"Likely hiring for backend roles given recent job postings","whyConf":"medium","whyConfSource":"Inferred from LinkedIn and job board activity","channel":"linkedin","channelLabel":"LinkedIn","li":"linkedin.com/in/boblee","x":null,"notes":{"curious":"Hi Bob, I work on data pipelines and noticed Acme is expanding the backend team. Would love to connect.","technical":"Hi Bob, backend engineer here focused on pipeline reliability. Saw the open roles and wanted to connect."},"intent":["job"]}],
+    "levelUp":[{"title":"Build an open-source tool that solves their core data problem","weekends":2,"why":"This company ingests data from inconsistent sources. A public tool demonstrates you can ship the exact capability they need.","capabilities":["Schema normalization across heterogeneous sources","Ingestion reliability when upstream formats change","Data quality monitoring at the input layer"],"stack":"Python, GitHub, public sample data","outcome":"Fit moves from 85 to 93."},{"title":"Write a technical article about the problem they are solving","weekends":1,"why":"No canonical resource exists for this problem. Writing it positions you as someone who understands it deeply.","capabilities":["Domain authority in their space","Linkable artifact for cold outreach","Signals depth without an application"],"stack":"Your blog or Substack","outcome":"Strengthens outreach credibility significantly."}],
+    "email":"Hi Jane,\n\nI am a backend engineer at Movius working on data pipeline reliability.\n\nI noticed Acme is solving X problem. The challenge of Y maps closely to what I work on in telecom data.\n\nWould love to hear how you think about Z.\n\nAnjali Baheti",
+    "followup":"Hi Jane, following up briefly. I think the overlap between what I work on and what Acme is building is worth a 15-minute conversation. Happy to work around your schedule."
+  };
+  var sysMsg="You are Sift, an opportunity discovery engine. You MUST return ONLY valid JSON. No markdown fences, no explanation, no text outside the JSON. Follow the example structure EXACTLY — same field names, same types, same nesting. Replace all values with real data for the requested company/domain. The meta field MUST be a single line formatted as: City · Stage · $XM raised · ~N people (use the · character, never newlines). All array fields must be arrays. All string fields must be strings. All number fields must be numbers.";
   var prompt=isCompany
-    ?('You are Sift. Return ONLY a JSON array containing exactly 1 object. No markdown, no explanation, no text before or after. Use this EXACT structure:\n[{"name":"'+query+'","meta":"City · Stage · $XM raised · ~N people","desc":"One sentence about what they build.","tags":["tag1","tag2"],"fit":85,"fitBreakdown":{"domain":90,"technical":88,"stage":80,"network":70,"experience":85},"opportunity":80,"outreach":75,"hiring":"active","visaSponsors":true,"brief":{"Company":"Name","Domain":"domain.com","Stage":"Series B","Raised":"$50M","Team":"~100","Problem":"Core problem they solve","Bet":"What they are betting on","Winning":"Why they are winning","Struggling":"Where they are struggling"},"needs":["Need 1","Need 2","Need 3","Need 4"],"fitReason":"1-2 sentences on why user background fits.","whyShort":"Under 15 words why now.","opportunityReason":"2-3 sentences on the opportunity.","signals":[{"type":"hiring","icon":"&#128101;","iconClass":"sig-hiring","typeClass":"type-hiring","title":"Signal title","detail":"Signal detail","impact":"Why this matters","date":"Q1 2026"}],"contact":"firstname@domain.com","contactConf":"pattern guess","li":"linkedin.com/in/handle","x":"@handle","people":[{"name":"Full Name","role":"CEO, Co-founder","tag":"tag-founder","tagLabel":"Founder","avColor":"terra","why":"Why reach out to them","whyConf":"high","whyConfSource":"Publicly identified founder","channel":"email","channelLabel":"Email","li":"linkedin.com/in/handle","x":"@handle","notes":{"curious":"2-3 sentence curious message","technical":"2-3 sentence technical message"},"intent":["collab","job"]}],"levelUp":[{"title":"Project title","weekends":2,"why":"Why this project matters for this company","capabilities":["Capability 1","Capability 2","Capability 3"],"stack":"Tools to use","outcome":"What fit score improvement to expect"}],"email":"Full cold email text","followup":"Short 2 sentence followup"}]\n\nUser background: '+bio+'. Research: '+query)
-    :('You are Sift. Return ONLY a JSON array of exactly 3 objects. No markdown, no explanation. Each object must follow this exact structure with ALL fields present:\n{"name":"string","meta":"City · Stage · $XM · ~N people","desc":"one sentence","tags":["tag1","tag2"],"fit":85,"fitBreakdown":{"domain":85,"technical":85,"stage":85,"network":85,"experience":85},"opportunity":80,"outreach":75,"hiring":"active","visaSponsors":true,"brief":{"Company":"","Domain":"","Stage":"","Raised":"","Team":"","Problem":"","Bet":"","Winning":"","Struggling":""},"needs":["","","",""],"fitReason":"","whyShort":"","opportunityReason":"","signals":[{"type":"hiring","icon":"&#128101;","iconClass":"sig-hiring","typeClass":"type-hiring","title":"","detail":"","impact":"","date":""}],"contact":"","contactConf":"pattern guess","li":"","x":null,"people":[{"name":"Full Name","role":"","tag":"tag-founder","tagLabel":"Founder","avColor":"terra","why":"","whyConf":"medium","whyConfSource":"","channel":"email","channelLabel":"Email","li":"","x":null,"notes":{"curious":"","technical":""},"intent":["job","collab"]}],"levelUp":[{"title":"","weekends":2,"why":"","capabilities":["","",""],"stack":"","outcome":""}],"email":"","followup":""}\n\nUser background: '+bio+'. Domain to search: '+query);
-  // Replace YOUR-PROJECT with your Vercel URL after deploying
+    ?(sysMsg+" Return a JSON array with exactly 1 object for the company: "+query+". User background: "+bio+". Example structure to follow: "+JSON.stringify([EXAMPLE_COMPANY]))
+    :(sysMsg+" Return a JSON array with exactly 3 objects for companies in this domain: "+query+". User background: "+bio+". Example structure to follow (replicate this structure for each company): "+JSON.stringify([EXAMPLE_COMPANY]));
+    // Replace YOUR-PROJECT with your Vercel URL after deploying
   var VERCEL_URL="https://YOUR-PROJECT.vercel.app";
   var resp,data,text;
   if(key){
@@ -1707,7 +1727,31 @@ function openConnectorDeepDive(from,to){
     buildPeopleLikeYou(data);
     buildCommunities(data);
   } else {
-    var msg='<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px;font-style:italic">Transition data for <strong style="color:var(--ink)">'+from+' \u2192 '+to+'</strong> is not in the demo dataset yet.<br><br>The 3 available transitions: <strong style="color:var(--pd)">Software Engineer \u2192 Product Manager</strong>, <strong style="color:var(--pd)">Product Manager \u2192 Startup Founder</strong>, <strong style="color:var(--pd)">Data Analyst \u2192 Data Scientist</strong>.<br><br>In the real product this would be generated by Claude in ~10 seconds.</div>';
+    var key=S.profile.key;
+    if(!key){
+      var msg='<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">Add your API key in Settings to map this transition.</div>';
+      document.querySelector(".tab-panel.active")?document.querySelector(".tab-panel.active").innerHTML=msg:null;
+      document.getElementById("d-levelup")&&(document.getElementById("d-levelup").innerHTML=msg);
+      document.getElementById("loading").style.display="none";
+      return;
+    }
+    // Generate transition data via AI
+    document.getElementById("loading").style.display="flex";
+    document.getElementById("ltext").textContent="Mapping "+from+" to "+to+"...";
+    var bio2=S.profile.bio||"Backend engineer";
+    var tprompt='Return ONLY a JSON object, no markdown. Map a career transition from "'+from+'" to "'+to+'" for someone with this background: '+bio2+'. Return: {"readiness":65,"skillGaps":[{"skill":"Skill name","gap":"high|medium|low","action":"Specific action to close this gap","timeWeeks":4}],"thirtyDayPlan":[{"week":1,"action":"Specific action","outcome":"What this proves"}],"projects":[{"title":"Project title","weekends":2,"why":"Why this matters for the transition","outcome":"What it demonstrates"}],"peopleLikeYou":[{"path":"Their transition path in 1 sentence","time":"How long it took","firstRole":"Their first role in new field"}],"communities":["Community name and why"]}. Include 3-4 items per array.';
+    siftAICall(tprompt,key).then(function(result){
+      document.getElementById("loading").style.display="none";
+      if(!result){return;}
+      try{
+        var td=JSON.parse(result.split("```json").join("").split("```").join("").trim());
+        // Store and render
+        S.currentTransition=td;
+        document.getElementById("readiness-score").textContent=td.readiness||65;
+        renderTransitionTab("skill-gap",td);
+      }catch(e){console.error("Transition parse error",e);}
+    }).catch(function(e){document.getElementById("loading").style.display="none";console.error(e);});
+    var msg="";
     cfg.forEach(function(t){var el=document.getElementById(t.id);if(el)el.innerHTML=msg;});
   }
 }
@@ -1894,6 +1938,61 @@ function buildResults(){
 }
 function switchLtab(t){document.getElementById("ltab-cos").classList.toggle("on",t==="cos");document.getElementById("ltab-research").classList.toggle("on",t==="research");document.getElementById("lpane-body-cos").style.display=t==="cos"?"block":"none";document.getElementById("lpane-body-research").style.display=t==="research"?"block":"none";document.getElementById("lpane-header-cos").style.display=t==="cos"?"flex":"none";}
 
+async function siftAICall(prompt,key){
+  try{
+    var isOpenAI=key&&key.startsWith("sk-")&&!key.startsWith("sk-ant-");
+    var resp,data;
+    if(isOpenAI){
+      resp=await fetch("https://api.openai.com/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model:S.profile.oaiModel||"gpt-4o",max_tokens:3000,messages:[{role:"user",content:prompt}]})});
+      data=await resp.json();
+      return data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content;
+    } else {
+      resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:S.profile.anthModel||"claude-sonnet-4-6",max_tokens:3000,messages:[{role:"user",content:prompt}]})});
+      data=await resp.json();
+      return data.content&&data.content[0]&&data.content[0].text;
+    }
+  }catch(e){console.error("siftAICall error:",e);return null;}
+}
+function renderTransitionTab(tab,td){
+  if(!td)return;
+  var el=document.getElementById("d-skilgap")||document.querySelector("[data-tab='skill-gap']");
+  // Skill gap
+  var sgEl=document.getElementById("d-skillgap");
+  if(sgEl&&td.skillGaps){
+    sgEl.innerHTML='<div class="lvlup-intro">Skills to build for this transition.</div>'+(td.skillGaps||[]).map(function(s){
+      var col=s.gap==="high"?"#E53935":s.gap==="medium"?"#FB8C00":"#43A047";
+      return'<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="font-weight:700;font-size:13px;color:var(--ink)">'+s.skill+'</div><span style="font-size:10px;font-weight:700;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:'+col+'22;color:'+col+'">'+s.gap+'</span></div><div style="font-size:12px;color:var(--ink2);margin-bottom:4px">'+s.action+'</div><div style="font-size:11px;color:var(--muted)">'+s.timeWeeks+' weeks</div></div>';
+    }).join("");
+  }
+  // 30-day plan
+  var planEl=document.getElementById("d-30day");
+  if(planEl&&td.thirtyDayPlan){
+    planEl.innerHTML=(td.thirtyDayPlan||[]).map(function(w){
+      return'<div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start"><div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--ps);border:2px solid var(--p);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--pd)">W'+w.week+'</div><div><div style="font-size:13px;color:var(--ink);font-weight:600;margin-bottom:3px">'+w.action+'</div><div style="font-size:11px;color:var(--muted)">'+w.outcome+'</div></div></div>';
+    }).join("");
+  }
+  // Projects
+  var projEl=document.getElementById("d-buildproof");
+  if(projEl&&td.projects){
+    projEl.innerHTML=(td.projects||[]).map(function(p){
+      return'<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px"><div style="font-weight:700;font-size:13px;color:var(--ink);margin-bottom:4px">'+p.title+'</div><div style="font-size:12px;color:var(--ink2);margin-bottom:6px">'+p.why+'</div><div style="font-size:11px;color:var(--pd);font-weight:600">'+p.outcome+'</div></div>';
+    }).join("");
+  }
+  // People like you
+  var pplEl=document.getElementById("d-peoplelikeyou");
+  if(pplEl&&td.peopleLikeYou){
+    pplEl.innerHTML=(td.peopleLikeYou||[]).map(function(p){
+      return'<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px"><div style="font-size:13px;color:var(--ink);margin-bottom:4px">'+p.path+'</div><div style="display:flex;gap:12px"><span style="font-size:11px;color:var(--muted)">Time: '+p.time+'</span><span style="font-size:11px;color:var(--pd);font-weight:600">First role: '+p.firstRole+'</span></div></div>';
+    }).join("");
+  }
+  // Communities
+  var commEl=document.getElementById("d-communities");
+  if(commEl&&td.communities){
+    commEl.innerHTML=(td.communities||[]).map(function(c){
+      return'<div style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;color:var(--ink)">&#128101; '+c+'</div>';
+    }).join("");
+  }
+}
 function normalizeCompany(c){
   if(!c)return c;
   // Strings
@@ -2242,7 +2341,26 @@ function buildCompetitive(c){
   var el=document.getElementById("d-comp");
   if(!el)return;
   var ext=founderExtras[c.name];
-  if(!ext){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Competitive map not available for this company in demo.</div>';return;}
+  if(!ext){
+    var key=S.profile.key;
+    if(!key){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Add your API key in Settings to generate a competitive map.</div>';return;}
+    el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Generating competitive map...</div>';
+    var bio=S.profile.bio||"Backend engineer";
+    var cprompt='Return ONLY a JSON object, no markdown. For the company "'+c.name+'" in context of user background: '+bio+'. Return: {"competitors":[{"name":"Company name","position":"1-2 sentences on their position","differentFrom":"How they differ from '+c.name+'","opportunity":"Why this matters for the user"}],"whitespace":"1-2 sentences on gaps in the market","takeaway":"1 sentence strategic takeaway for the user"}. Include 3-4 competitors.';
+    siftAICall(cprompt,key).then(function(result){
+      if(!result){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Could not generate competitive map. Try again.</div>';return;}
+      try{
+        var d=JSON.parse(result.split("```json").join("").split("```").join("").trim());
+        var html='<div style="padding:0">';
+        if(d.whitespace)html+='<div style="background:var(--ps);border-left:3px solid var(--p);padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--ink)">&#128269; '+d.whitespace+'</div>';
+        (d.competitors||[]).forEach(function(co){html+='<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px"><div style="font-weight:700;font-size:13px;color:var(--ink);margin-bottom:4px">'+co.name+'</div><div style="font-size:12px;color:var(--ink2);margin-bottom:4px">'+co.position+'</div><div style="font-size:11px;color:var(--muted)">vs '+c.name+': '+co.differentFrom+'</div></div>';});
+        if(d.takeaway)html+='<div style="font-size:12px;color:var(--pd);font-weight:600;padding:10px 0">&#127919; '+d.takeaway+'</div>';
+        html+='</div>';
+        el.innerHTML=html;
+      }catch(e){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Could not parse competitive map. Try again.</div>';}
+    }).catch(function(){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Could not generate competitive map. Try again.</div>';});
+    return;
+  }
   var ovl={high:"high",medium:"medium",low:"low"};
   var compHtml=(ext.competitors||[]).map(function(comp){
     var bar='<div class="comp-bar '+ovl[comp.overlap]+'"></div>';
@@ -2262,7 +2380,30 @@ function buildFunding(c){
   var el=document.getElementById("d-funding");
   if(!el)return;
   var ext=founderExtras[c.name];
-  if(!ext){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Funding data not available for this company in demo.</div>';return;}
+  if(!ext){
+    var key=S.profile.key;
+    if(!key){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Add your API key in Settings to generate funding data.</div>';return;}
+    el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Fetching funding data...</div>';
+    var bio=S.profile.bio||"Backend engineer";
+    var fprompt='Return ONLY a JSON object, no markdown. For the company "'+c.name+'". Return: {"rounds":[{"round":"Series name e.g. Seed","amount":"$XM","date":"Month Year","lead":"Lead investor name","note":"1 sentence on what this round enabled"}],"totalRaised":"$XM total","lastValuation":"$XM or unknown","notableInvestors":["Investor 1","Investor 2","Investor 3"],"burnNote":"1 sentence estimate on runway/burn stage","founderNote":"1 sentence on what the funding trajectory signals for someone wanting to join"}. Include all known rounds.';
+    siftAICall(fprompt,key).then(function(result){
+      if(!result){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Could not fetch funding data. Try again.</div>';return;}
+      try{
+        var d=JSON.parse(result.split("```json").join("").split("```").join("").trim());
+        var html='<div>';
+        html+='<div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap">';
+        if(d.totalRaised)html+='<div style="background:var(--ps);border-radius:8px;padding:10px 14px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Total Raised</div><div style="font-size:18px;font-weight:700;color:var(--pd)">'+d.totalRaised+'</div></div>';
+        if(d.lastValuation&&d.lastValuation!=="unknown")html+='<div style="background:var(--ps);border-radius:8px;padding:10px 14px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Last Valuation</div><div style="font-size:18px;font-weight:700;color:var(--pd)">'+d.lastValuation+'</div></div>';
+        html+='</div>';
+        (d.rounds||[]).reverse().forEach(function(r){html+='<div style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start"><div style="flex-shrink:0;text-align:center;min-width:60px"><div style="font-weight:700;font-size:13px;color:var(--pd)">'+r.round+'</div><div style="font-size:11px;color:var(--muted)">'+r.date+'</div></div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--ink)">'+r.amount+'</div><div style="font-size:11px;color:var(--ink2)">Lead: '+r.lead+'</div>'+( r.note?'<div style="font-size:11px;color:var(--muted);margin-top:3px">'+r.note+'</div>':'')+'</div></div>';});
+        if(d.notableInvestors&&d.notableInvestors.length)html+='<div style="margin-top:12px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px">Notable Investors</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+d.notableInvestors.map(function(i){return'<span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--ink2)">'+i+'</span>';}).join("")+'</div></div>';
+        if(d.founderNote)html+='<div style="margin-top:14px;font-size:12px;color:var(--pd);font-weight:600;border-top:1px solid var(--border);padding-top:10px">&#128161; '+d.founderNote+'</div>';
+        html+='</div>';
+        el.innerHTML=html;
+      }catch(e){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Could not parse funding data. Try again.</div>';}
+    }).catch(function(){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Could not fetch funding data. Try again.</div>';});
+    return;
+  }
   // Summary cards
   var summ='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">'
     +'<div style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px 12px"><div style="font-family:Fraunces,serif;font-size:18px;font-weight:700">'+ext.totalRaised+'</div><div style="font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)">Total Raised</div></div>'
@@ -2326,7 +2467,7 @@ function buildEmptyState(intent){
       +'<div style="width:28px;height:28px;border-radius:50%;background:var(--ps);color:var(--pd);font-family:Syne,sans-serif;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+s.n+'</div>'
       +'<div><div style="font-weight:700;font-size:13px;color:var(--ink)">'+s.title+'</div>'
       +'<div style="font-size:12px;color:var(--ink2);line-height:1.6;margin-top:2px">'+s.desc+'</div></div></div>';}).join("")
-    +'</div><div style="font-size:11px;color:var(--muted);font-style:italic">Demo mode · all data is pre-built</div></div>';
+    +'</div></div>';
 }
 function qs(v){document.getElementById("sq").value=v;doSearch();}
 // es-link style injected once
