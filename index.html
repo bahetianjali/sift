@@ -914,7 +914,7 @@ body:not(.app-mode) .main{display:none}
 
 <script>
 // ── STATE ──
-var S={intent:"job",geo:"world",visa:false,sort:"fit",mode:"domain",query:"",currentCo:null,currentPeople:[],filtersOpen:false,aiResults:null,usingAI:false,_card1Ready:false,_waitingToOpen:false,profile:{name:"",bio:"",li:"",key:"",anthModel:"claude-sonnet-4-6",oaiModel:"gpt-4o"}};
+var S={intent:"job",geo:"world",visa:false,sort:"fit",mode:"domain",query:"",currentCo:null,currentPeople:[],filtersOpen:false,aiResults:null,usingAI:false,_card1Ready:false,_waitingToOpen:false,_userPickedCard:false,totalTokens:0,profile:{name:"",bio:"",li:"",key:"",anthModel:"claude-sonnet-4-6",oaiModel:"gpt-4o"}};
 
 // ── TRANSITION DATA ──
 var transitionData={
@@ -1199,6 +1199,8 @@ function updateProfileUI(){var hasName=S.profile.name&&S.profile.name.trim().len
 
 // ── PERSONA SELECTION + THEME ──
 function selectPersona(intent,silent){
+  var prevIntent=S.intent;
+  if(intent===prevIntent&&!silent&&document.body.classList.contains("app-mode"))return;
   setIntent(intent);
   document.querySelectorAll(".persona").forEach(function(p){p.classList.remove("selected")});
   var card=document.getElementById("persona-"+intent);
@@ -1274,12 +1276,18 @@ function selectPersona(intent,silent){
           }
         }
       }
-      // Re-search with new persona if AI-powered results exist
-      if(S.query&&S.profile.key&&(S.usingAI||S.aiResults)){
-        var intentNames={collab:"The Founder",job:"The Climber"};
-        document.getElementById("loading").style.display="flex";
-        document.getElementById("ltext").textContent="Researching as "+(intentNames[intent]||intent)+"...";
-        setTimeout(function(){doSearch();},200);
+      // Re-search whenever there's a query and we have a key
+      if(S.query&&S.profile.key){
+        // Reset state for fresh search
+        S.aiResults=[];
+        S.usingAI=true;
+        S._userPickedCard=false;
+        S.totalTokens=0;
+        setTimeout(function(){doSearch();},100);
+      } else if(S.query&&!S.profile.key){
+        // No key — just re-render static results with new persona tabs
+        buildResults();
+        if(S.currentCo)openCompany((companies||[]).indexOf(S.currentCo));
       } else if(S.currentCo){
         var coIdx=companies.indexOf(S.currentCo);
         if(coIdx>-1)openCompany(coIdx);
@@ -1353,7 +1361,7 @@ function toggleFilters(){S.filtersOpen=!S.filtersOpen;document.getElementById("f
 function closeFilters(){S.filtersOpen=false;document.getElementById("filter-drawer").classList.remove("open");}
 function handleFilterOverlayClick(e){if(e.target===document.getElementById("filter-drawer"))closeFilters();}
 function updateFilterCount(){var c=0;if(S.intent!=="job")c++;if(S.geo!=="world")c++;if(S.visa)c++;document.getElementById("filter-count").textContent=c;document.getElementById("filter-trigger").classList.toggle("has-filters",c>0);}
-function setIntent(v){var _prevIntent=S.intent;S.intent=v;["collab","job","network"].forEach(function(k){var el=document.getElementById("i-"+k);if(el)el.classList.toggle("on",k===v)});document.getElementById("visa-group").style.display=v==="job"?"block":"none";if(v!=="job"){S.visa=false;document.getElementById("visa-check").innerHTML="&#9744;";document.getElementById("visa-toggle").classList.remove("on");}updateFilterCount();saveS();if(S.query)buildResults();
+function setIntent(v){var _prevIntent=S.intent;S.intent=v;["collab","job","network"].forEach(function(k){var el=document.getElementById("i-"+k);if(el)el.classList.toggle("on",k===v)});document.getElementById("visa-group").style.display=v==="job"?"block":"none";if(v!=="job"){S.visa=false;document.getElementById("visa-check").innerHTML="&#9744;";document.getElementById("visa-toggle").classList.remove("on");}updateFilterCount();saveS();
   if(_prevIntent!==v&&document.body.classList.contains("app-mode")&&S.currentCo){
     var _ri=companies.indexOf(S.currentCo);
     if(_ri>-1)setTimeout(function(){openCompany(_ri);},50);
@@ -1385,7 +1393,7 @@ function setGeo(v){
 }
 function detectLocation(){var inp=document.getElementById("geo-city");if(!inp)return;inp.value="Detecting...";inp.disabled=true;fetch("https://ipapi.co/json/").then(function(r){return r.json()}).then(function(d){inp.value=(d.city||"")+(d.region_code?", "+d.region_code:"");inp.disabled=false;}).catch(function(){inp.value="";inp.placeholder="Enter your city manually";inp.disabled=false;});}
 function detectLocationLanding(){var inp=document.getElementById("lg-geo-city");if(!inp)return;inp.value="Detecting...";inp.disabled=true;fetch("https://ipapi.co/json/").then(function(r){return r.json()}).then(function(d){inp.value=(d.city||"")+(d.region_code?", "+d.region_code:"");inp.disabled=false;}).catch(function(){inp.value="";inp.placeholder="Enter your city manually";inp.disabled=false;});}
-function toggleVisa(){S.visa=!S.visa;document.getElementById("visa-check").innerHTML=S.visa?"&#9745;":"&#9744;";document.getElementById("visa-toggle").classList.toggle("on",S.visa);updateFilterCount();saveS();if(S.query)buildResults();
+function toggleVisa(){S.visa=!S.visa;document.getElementById("visa-check").innerHTML=S.visa?"&#9745;":"&#9744;";document.getElementById("visa-toggle").classList.toggle("on",S.visa);updateFilterCount();saveS();
   if(_prevIntent!==v&&document.body.classList.contains("app-mode")&&S.currentCo){
     var _ri=companies.indexOf(S.currentCo);
     if(_ri>-1)setTimeout(function(){openCompany(_ri);},50);
@@ -1466,6 +1474,8 @@ function doSearch(){
     // Domain search — progressive: fetch one card at a time, render each as it arrives
     S.aiResults=[];
     S.usingAI=true;
+    S._userPickedCard=false;
+    S.totalTokens=0;
     enterAppMode(false);
     buildResults(); // show empty state immediately
     doProgressiveSearch(q,key,0,5);
@@ -1548,13 +1558,15 @@ function showLoadingPhrases(intent,onDone){
             if(onDone)onDone();
             return;
           }
-          // Company/domain mode
-          if(S._card1Ready&&S.aiResults&&S.aiResults.length>0){
-            openCompany(0);
-          } else {
-            var phr=document.getElementById("loading-phrase");
-            if(phr)phr.innerHTML='<span style="font-family:Fraunces,serif;font-size:36px;font-weight:700;color:var(--ink)">Almost there...</span>';
-            S._waitingToOpen=true;
+          // Company/domain mode — only auto-open if user hasn't clicked a card
+          if(!S._userPickedCard){
+            if(S._card1Ready&&S.aiResults&&S.aiResults.length>0){
+              openCompany(0);
+            } else {
+              var phr=document.getElementById("loading-phrase");
+              if(phr)phr.innerHTML='<span style="font-family:Fraunces,serif;font-size:36px;font-weight:700;color:var(--ink)">Almost there...</span>';
+              S._waitingToOpen=true;
+            }
           }
           if(onDone)onDone();
           return;
@@ -1993,8 +2005,13 @@ function buildConnectorResults(from,to){
   // Don't touch cocount — it was removed by the tab label replacement above
   var cos=document.getElementById("lpane-body-cos");
   if(cos){
-    var tokenEst=1200+Math.floor(Math.random()*900);
-    var costEst=(tokenEst*0.000003).toFixed(4);
+    var tokenEst=S.totalTokens>0?S.totalTokens:(1200+Math.floor(Math.random()*900));
+    var model=S.profile.anthModel||S.profile.oaiModel||"claude-sonnet-4-6";
+    var isOAI=S.profile.key&&S.profile.key.startsWith("sk-")&&!S.profile.key.startsWith("sk-ant-");
+    var costPerTok;
+    if(isOAI){costPerTok=model.indexOf("mini")>-1?0.00000045:0.000006;}
+    else{costPerTok=model.indexOf("haiku")>-1?0.0000038:model.indexOf("opus")>-1?0.000020:0.000012;}
+    var costEst=(tokenEst*costPerTok).toFixed(4);
     cos.innerHTML='<div style="font-size:10px;color:var(--muted);margin-bottom:6px;text-align:right">~'+tokenEst+' tokens \u00b7 ~$'+costEst+'</div>'
       +'<div class="ccard active" id="conn-result-card"><div class="cc-top"><div style="flex:1"><div class="cc-name">'+from+' \u2192 '+to+'</div><div class="cc-meta">Career transition map</div></div><div class="cc-scores-mini"><span class="smini f">'+(data?data.readiness:65)+'</span></div></div><div class="cc-why">Skill gap analysis, 30-day plan, people who made this exact move.</div></div>';
     document.getElementById("conn-result-card").addEventListener("click",function(){openConnectorDeepDive(from,to);});
@@ -2202,8 +2219,13 @@ function buildResults(){
   var coEl=document.getElementById("cocount");if(coEl)coEl.textContent=sorted.length;
   var titleMap={fit:"Ranked by Fit",opportunity:"Ranked by Why Now",outreach:"Ranked by Reach"};
   document.getElementById("lpane-title").textContent=titleMap[S.sort];
-  var tokenEst=1200+Math.floor(Math.random()*900);
-  var costEst=(tokenEst*0.000003).toFixed(4);
+  var tokenEst=S.totalTokens>0?S.totalTokens:(1200+Math.floor(Math.random()*900));
+  var model=S.profile.anthModel||S.profile.oaiModel||"claude-sonnet-4-6";
+    var isOAI=S.profile.key&&S.profile.key.startsWith("sk-")&&!S.profile.key.startsWith("sk-ant-");
+    var costPerTok;
+    if(isOAI){costPerTok=model.indexOf("mini")>-1?0.00000045:0.000006;}
+    else{costPerTok=model.indexOf("haiku")>-1?0.0000038:model.indexOf("opus")>-1?0.000020:0.000012;}
+    var costEst=(tokenEst*costPerTok).toFixed(4);
   var cos=document.getElementById("lpane-body-cos");
   cos.innerHTML='<div style="font-size:10px;color:var(--muted);margin-bottom:6px;text-align:right">~'+tokenEst+' tokens \u00b7 ~$'+costEst+'</div>';
   if(S.intent==="job"&&S.visa){cos.innerHTML+='<div style="background:var(--amber-soft);border:1px solid var(--amber);border-radius:7px;padding:7px 10px;font-size:10px;color:var(--amber-deep);margin-bottom:8px">&#9432; H1B Filter active \u00b7 USA only \u00b7 Expanding soon</div>';}
@@ -2304,6 +2326,8 @@ async function siftAICall(prompt,key){
     } else {
       resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:S.profile.anthModel||"claude-sonnet-4-6",max_tokens:3000,messages:[{role:"user",content:prompt}]})});
       data=await resp.json();
+      var t=(data.usage&&((data.usage.input_tokens||0)+(data.usage.output_tokens||0)))||0;
+      if(t&&S)S.totalTokens=(S.totalTokens||0)+t;
       return data.content&&data.content[0]&&data.content[0].text;
     }
   }catch(e){console.error("siftAICall error:",e);return null;}
