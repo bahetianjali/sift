@@ -1651,7 +1651,21 @@ async function fetchOneCard(q,key,idx,total){
   var intentLabel={"collab":"founder looking for collaborators","job":"climber looking for their next role","network":"connector mapping transitions"}[S.intent]||"professional";
   var avoidNames=S.aiResults.map(function(c){return c.name;}).join(", ");
   var avoidClause=avoidNames?"Do NOT return any of these already-found companies: "+avoidNames+". ":"";
-  var prompt='You are Sift. Return ONLY a JSON object (not array), no markdown. '+avoidClause+'Find company number '+(idx+1)+' of '+total+' in this domain: '+q+'. The user is a '+intentLabel+'. User background: '+bio+'. Return this exact structure: {"name":"Company Name","meta":"City · Stage · $XM raised · ~N people","desc":"One sentence on what they build.","tags":["Tag1","Tag2"],"fit":85,"fitBreakdown":{"domain":88,"technical":90,"stage":80,"network":70,"experience":85},"opportunity":78,"outreach":72,"hiring":"active","visaSponsors":true,"fitReason":"1-2 sentences why this fits the user specifically.","whyShort":"Under 15 words why now.","brief":{"Company":"Name","Domain":"domain.com","Stage":"Series B","Raised":"$40M","Team":"~80","Problem":"Core problem","Bet":"Market bet","Winning":"Current advantage","Struggling":"Current bottleneck"},"needs":["Need 1","Need 2","Need 3","Need 4"]}';
+  // Build geo constraint
+  var geoClause="";
+  if(S.geo==="region"){
+    var city=document.getElementById("lg-geo-city");
+    var cityVal=city&&city.value?city.value.trim():"";
+    if(!cityVal){var gc=document.getElementById("geo-city");cityVal=gc&&gc.value?gc.value.trim():"";}
+    geoClause=cityVal?"Only return companies with a physical presence (headquarters, office, or significant team) within 250 miles of "+cityVal+". This includes remote-first companies with offices or teams in that region. Do NOT return companies with no presence near "+cityVal+". ":"Only return companies with a presence near the user's location. ";
+  } else if(S.geo==="country"){
+    var country=document.getElementById("lg-geo-country");
+    var countryVal=country&&country.value?country.value.trim():"";
+    if(!countryVal){var gc2=document.getElementById("geo-country-search");countryVal=gc2&&gc2.value?gc2.value.trim():"";}
+    geoClause=countryVal?"Only return companies with a significant presence (HQ, office, or team) in "+countryVal+". This includes companies founded or operating in "+countryVal+", not just those headquartered there. ":"";
+  }
+  // If fewer results due to geo — that's fine, return what exists (can be fewer than total)
+  var prompt='You are Sift. Return ONLY a JSON object (not array), no markdown. '+avoidClause+geoClause+'Find company number '+(idx+1)+' of '+total+' in this domain: '+q+'. The user is a '+intentLabel+'. User background: '+bio+'. Return this exact structure: {"name":"Company Name","meta":"City · Stage · $XM raised · ~N people","desc":"One sentence on what they build.","tags":["Tag1","Tag2"],"fit":85,"fitBreakdown":{"domain":88,"technical":90,"stage":80,"network":70,"experience":85},"opportunity":78,"outreach":72,"hiring":"active","visaSponsors":true,"fitReason":"1-2 sentences why this fits the user specifically.","whyShort":"Under 15 words why now.","brief":{"Company":"Name","Domain":"domain.com","Stage":"Series B","Raised":"$40M","Team":"~80","Problem":"Core problem","Bet":"Market bet","Winning":"Current advantage","Struggling":"Current bottleneck"},"needs":["Need 1","Need 2","Need 3","Need 4"]}';
   var text=await siftAICall(prompt,key);
   if(!text)return null;
   var clean=text.split("```json").join("").split("```").join("").trim();
