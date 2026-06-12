@@ -12,9 +12,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,700&family=Syne:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Force light mode everywhere — prevent iOS dark mode */
-html { color-scheme: light; background: #F0F5EB; }
-body { background: #F0F5EB !important; }
+/* Force light mode — prevent iOS dark mode */
+html { color-scheme: light; }
 
 @media(max-width:640px){
   /* Deep dive header — stack on mobile */
@@ -43,7 +42,7 @@ body { background: #F0F5EB !important; }
 }
 
 
-#v2-landing { background: var(--bg); transition: background .5s ease; }
+#v2-landing { background: transparent; }
 
 
 /* Landing-mode neutral theme (before persona selected) */
@@ -52,10 +51,50 @@ body.theme-neutral .eyebrow em{color:#1E5A6B}
 
 .footer-tagline{
   font-family:'Fraunces',serif;font-size:28px;font-weight:400;letter-spacing:-.01em;
-  color:var(--ink);margin-bottom:18px;line-height:1.2;
+  color:var(--ink);margin-bottom:18px;line-height:1.2;padding-top:48px;
 }
-.footer-tagline em{font-style:italic;color:var(--p);font-weight:500}
+.footer-tagline em{font-style:italic;color:#1E5A6B;font-weight:500}
 .footer-byline{font-size:12px;color:var(--muted);line-height:1.6}
+.footer-byline a{color:#1E5A6B}
+
+
+/* ── LANDING WELCOME — matches index.html tone exactly ── */
+.landing-welcome{
+  text-align:center;padding:64px 48px 8px;max-width:800px;margin:0 auto;
+}
+.landing-eyebrow{
+  font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
+  color:#1E5A6B;margin-bottom:20px;
+}
+.landing-hed{
+  font-family:'Fraunces',serif;font-size:52px;font-weight:500;line-height:1.08;
+  color:var(--ink);letter-spacing:-.025em;margin-bottom:14px;font-optical-sizing:auto;
+}
+.landing-hed em{font-style:italic;color:#0F3D4A;font-weight:500}
+.landing-sub{
+  font-size:16px;color:var(--ink2);line-height:1.65;max-width:540px;margin:0 auto;
+}
+.v2-search-block{
+  max-width:720px;margin:0 auto;padding:28px 48px 0;text-align:center;
+}
+.v2-search-block .search-prompt{display:none!important;
+  font-family:'Fraunces',serif;font-size:22px;font-weight:500;color:var(--ink);
+  letter-spacing:-.015em;margin-bottom:6px;
+}
+.v2-search-block .search-sub{
+  font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.5;
+}
+/* Mobile */
+@media(max-width:640px){
+  .landing-welcome{padding:40px 20px 8px}
+  .landing-hed{font-size:32px!important}
+  .v2-search-block{padding:16px 16px 0}
+  .v2-search-block .search-prompt{display:none!important;font-size:16px}
+}
+
+
+.mode-tabs{display:none!important}
+
 
 </style>
 <style>
@@ -73,7 +112,7 @@ body.theme-indigo{--p:var(--indigo);--ps:var(--indigo-soft);--pd:var(--indigo-de
 body.theme-teal{--p:var(--teal);--ps:var(--teal-soft);--pd:var(--teal-deep);--bg:#EEF5F5}
 html{height:100%}
 html,body{min-height:100%}
-body{background:var(--bg);transition:background .35s ease;color:var(--ink);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;line-height:1.5;font-weight:400}
+body{background:var(--bg);transition:background .4s ease;color:var(--ink);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;line-height:1.5;font-weight:400}
 .serif{font-family:'Fraunces',Georgia,serif}
 .syne{font-family:'Syne',sans-serif}
 body.app-mode{height:100%;overflow:hidden;display:flex;flex-direction:column}
@@ -584,10 +623,7 @@ body:not(.app-mode) .main{display:none}
   .eyebrow{font-size:9px;letter-spacing:.14em}
   .lens-section{padding:28px 16px 0}
   .section-label{font-size:9px}
-  .flip-row{flex-direction:column;align-items:center;gap:12px;padding:0 16px}
-  .flip-card{max-width:100%;width:100%;height:auto;min-height:160px}
-  .flip-front{padding:20px}
-  .flip-back{padding:20px}
+  /* flip card mobile rules moved to end of last style block for cascade priority */
   .search-section{padding:28px 16px 0}
   /* Stack search bar and button vertically on mobile */
   .search-bar-wrap{display:flex;flex-direction:column;gap:8px}
@@ -595,7 +631,7 @@ body:not(.app-mode) .main{display:none}
   .search-go{position:static!important;transform:none!important;border-radius:10px;width:100%;padding:14px;font-size:15px;font-weight:600}
   .scope-row{gap:6px;flex-wrap:wrap}
   .scope-pill{font-size:12px;padding:6px 12px}
-  .footer{padding:16px 20px 32px;font-size:12px}
+  .footer{margin-top:56px;padding:16px 20px 32px;font-size:12px}
   .nav-btn{display:none}
   /* Ensure search input takes full width */
   .search-bar-wrap .search-bar{width:100%}
@@ -896,7 +932,8 @@ body:not(.app-mode) .topbar-mid { display: none !important; }
 .topbar-conn-wrap { display: none !important; }
 body.intent-network.app-mode .topbar-conn-wrap { display: flex !important; flex:1; gap:6px; }
 body.intent-network #topbar-mid { display: none !important; }
-body.intent-network #topbar-mid-conn { display: flex !important; }
+/* only show transition bar in app mode, not on landing */
+body.intent-network.app-mode #topbar-mid-conn { display: flex !important; }
 
 </style>
 <style>
@@ -915,7 +952,7 @@ body.theme-indigo{--p:var(--indigo);--ps:var(--indigo-soft);--pd:var(--indigo-de
 body.theme-teal{--p:var(--teal);--ps:var(--teal-soft);--pd:var(--teal-deep);--bg:#EEF5F5}
 html{height:100%}
 html,body{min-height:100%}
-body{background:var(--bg);transition:background .35s ease;color:var(--ink);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;line-height:1.5;font-weight:400}
+body{background:var(--bg);transition:background .4s ease;color:var(--ink);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;line-height:1.5;font-weight:400}
 .serif{font-family:'Fraunces',Georgia,serif}
 .syne{font-family:'Syne',sans-serif}
 body.app-mode{height:100%;overflow:hidden;display:flex;flex-direction:column}
@@ -1458,7 +1495,7 @@ body {
   padding: 22px 48px;
   position: sticky;
   top: 0;
-  background: var(--bg);
+  background:var(--bg);
   z-index: 10;
   border-bottom: 0.5px solid transparent;
   transition: border-color .2s;
@@ -1518,7 +1555,7 @@ body {
 /* ── LENS SECTION ── */
 .lens-section {
   padding: 52px 48px 0;
-  max-width: 960px;
+  max-width: 1440px;
   margin: 0 auto;
 }
 .section-label {
@@ -1534,12 +1571,14 @@ body {
 /* ── FLIP CARDS ── */
 .flip-row {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   justify-content: center;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
 }
 .flip-card {
   flex: 1;
-  max-width: 280px;
   height: 240px;
   cursor: pointer;
   perspective: 1000px;
@@ -1786,7 +1825,7 @@ body {
   padding: 20px 48px 36px;
   line-height: 1.8;
 }
-.footer a { color: var(--green); text-decoration: none; }
+.footer a { color: #1E5A6B; text-decoration: none; }
 .footer a:hover { text-decoration: underline; }
 
 /* ── SEARCH BAR LENS COLOR ── */
@@ -1824,17 +1863,49 @@ body.app-mode #nav .nav-right .nav-btn { display: none !important; }
 body.app-mode #nav .topbar-mid { max-width: none; flex: 1; margin: 0 12px; }
 
 body.app-mode .sift-page { display: none; }
+
+/* Mobile flip cards — must come after base rules to win cascade */
+@media(max-width:640px){
+  .flip-row{flex-direction:column!important;align-items:stretch!important;gap:14px!important;padding:0 16px!important}
+  .flip-card{flex:none!important;max-width:100%!important;width:100%!important;height:260px!important}
+  .flip-front,.flip-back{padding:18px!important}
+  .card-illustration{font-size:32px!important;margin-bottom:6px!important}
+  .card-name{font-size:17px!important}
+  .back-title{font-size:14px!important}
+  .back-q{font-size:12px!important}
+  .landing-hed{font-size:30px!important}
+  .landing-welcome{padding:36px 20px 4px!important}
+  .v2-search-block{padding:14px 16px 0!important}
+}
+
+
+
+/* DEFINITIVE: transition bar hidden unless app-mode + connector */
+#topbar-mid-conn { display: none !important; }
+body.app-mode.intent-network #topbar-mid-conn { display: flex !important; }
+
+/* Scope pill hover follows active theme (green/purple/teal) */
+.scope-pill:hover{border-color:var(--p)!important;color:var(--p)!important;background:var(--ps)!important}
+.scope-pill.active{border-color:var(--p)!important;color:var(--pd)!important;background:var(--ps)!important}
 </style>
   <meta name="color-scheme" content="light only">
   <meta name="supported-color-schemes" content="light">
 </head>
-<body class="theme-neutral intent-collab">
+<body class="theme-neutral">
+<datalist id="city-suggestions">
+<option value="Atlanta, GA"><option value="Alpharetta, GA"><option value="New York, NY"><option value="San Francisco, CA"><option value="Seattle, WA"><option value="Austin, TX"><option value="Boston, MA"><option value="Chicago, IL"><option value="Denver, CO"><option value="Los Angeles, CA"><option value="Miami, FL"><option value="Washington, DC"><option value="Dallas, TX"><option value="Houston, TX"><option value="Philadelphia, PA"><option value="Phoenix, AZ"><option value="San Diego, CA"><option value="San Jose, CA"><option value="Portland, OR"><option value="Nashville, TN"><option value="Charlotte, NC"><option value="Raleigh, NC"><option value="Minneapolis, MN"><option value="Salt Lake City, UT"><option value="Pittsburgh, PA"><option value="Detroit, MI"><option value="Columbus, OH"><option value="Tampa, FL"><option value="Orlando, FL"><option value="Kansas City, MO"><option value="St. Louis, MO"><option value="Toronto, ON"><option value="Vancouver, BC"><option value="London, UK"><option value="Berlin, Germany"><option value="Bangalore, India"><option value="Mumbai, India"><option value="Singapore"><option value="Sydney, Australia"><option value="Dublin, Ireland">
+</datalist>
+<datalist id="country-suggestions">
+<option value="United States"><option value="Canada"><option value="United Kingdom"><option value="Germany"><option value="France"><option value="India"><option value="Australia"><option value="Japan"><option value="Singapore"><option value="Netherlands"><option value="Sweden"><option value="Switzerland"><option value="Israel"><option value="Brazil"><option value="Mexico"><option value="South Korea"><option value="Ireland"><option value="Spain"><option value="Italy"><option value="UAE"><option value="Saudi Arabia"><option value="Nigeria"><option value="Kenya"><option value="South Africa"><option value="Indonesia"><option value="Philippines"><option value="Vietnam"><option value="Poland"><option value="Czech Republic"><option value="Portugal"><option value="Denmark"><option value="Norway"><option value="Finland"><option value="New Zealand"><option value="Argentina"><option value="Chile"><option value="Colombia"><option value="Taiwan"><option value="Thailand"><option value="Malaysia">
+</datalist>
+<input type="hidden" id="lg-geo-city" value="">
+<input type="hidden" id="lg-geo-country" value="">
 <input type="hidden" id="conn-from" value="">
 <input type="hidden" id="conn-to" value="">
 
 
 <nav class="nav" id="nav">
-  <div class="logo" onclick="goHome()" style="cursor:pointer">sift<span class="logo-dot">.</span></div>
+  <a class="logo" href="index.html" style="cursor:pointer;text-decoration:none">sift<span class="logo-dot">.</span></a>
   <!-- App-mode search bar (hidden on landing) -->
   <div class="topbar-mid" id="topbar-mid" style="display:none">
     <input class="app-sinput" id="app-sq" type="text" placeholder="Search another domain..." style="flex:1;width:100%">
@@ -1879,7 +1950,7 @@ body.app-mode .sift-page { display: none; }
         <div class="fopt on" id="g-world" onclick="setGeo('world')">🌍 Worldwide</div>
         <div id="geo-input-mini" style="display:none;flex:1;min-width:180px">
           <div style="display:flex;align-items:center;gap:7px;background:var(--card);border:1.5px solid var(--p);border-radius:9px;padding:6px 10px">
-            <input id="geo-city" list="city-suggestions" placeholder="Enter your city..." style="display:none;border:none;outline:none;font-size:13px;font-family:inherit;background:transparent;color:var(--ink);flex:1;min-width:0">
+            <input id="geo-city" list="city-suggestions" placeholder="Enter your city..." oninput="if(window.S)S.geoCity=this.value;var lt=document.getElementById('v2-loc-text');if(lt&&this.value)lt.textContent='\uD83D\uDCCD '+this.value;" style="display:none;border:none;outline:none;font-size:13px;font-family:inherit;background:transparent;color:var(--ink);flex:1;min-width:0">
             <input id="geo-country-search" list="country-suggestions" placeholder="Enter your country..." style="display:none;border:none;outline:none;font-size:13px;font-family:inherit;background:transparent;color:var(--ink);flex:1;min-width:0">
             <button id="geo-detect-btn" onclick="detectLocation()" style="display:none;padding:3px 9px;background:var(--ps);border:1px solid var(--p);border-radius:6px;font-size:11px;font-weight:600;color:var(--pd);cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">📍 Auto-detect</button>
           </div>
@@ -1904,21 +1975,25 @@ body.app-mode .sift-page { display: none; }
 </div>
 
 <div id="v2-landing">
-<div class="hero">
-  <p class="eyebrow">Stop searching. Start <em>sifting</em>.</p>
+
+<div class="landing-welcome">
+  <p class="landing-eyebrow">Opportunity discovery, not search</p>
+  <h1 class="landing-hed" id="landing-hed">Five opportunities matched to your background.</h1>
+  
 </div>
 
-<div class="search-section">
-  <p class="search-prompt" id="search-prompt">What market are you curious about?</p>
-  <p class="search-sub" id="search-sub">Domain mode finds the right companies. Company mode opens a research deep dive.</p>
 
+</div>
+
+<div class="v2-search-block" id="v2-search-block">
+  
+  <p class="search-sub" id="search-sub" style="display:none"></p>
   <div class="search-bar-wrap">
     <input class="search-bar" type="text" id="search-input"
       placeholder="e.g. climate software, AI infrastructure, fintech spend…" />
     <button class="search-go" id="search-go">Find →</button>
   </div>
-
-  <div class="scope-row">
+  <div class="scope-row" id="v2-scope-row">
     <button class="scope-pill active" onclick="setScope(this,0)">
       <span class="icon">📍</span> Near me
     </button>
@@ -1931,34 +2006,32 @@ body.app-mode .sift-page { display: none; }
     <div class="row-divider"></div>
     <span class="loc-text" id="v2-loc-text">📍 Alpharetta, GA</span>
   </div>
-  <div id="v2-geo-expand" style="display:none;margin-bottom:14px">
+  <!-- Inline geo inputs — appear when Near me or My country selected -->
+  <div id="v2-geo-expand" style="display:none;margin-top:12px;max-width:480px;margin-left:auto;margin-right:auto">
     <div id="v2-city-wrap" style="display:none;flex-direction:row;gap:8px;align-items:center">
-    <input id="v2-geo-city" list="city-suggestions"
-      placeholder="Type a city (e.g. Atlanta, GA)"
-      style="flex:1;padding:10px 14px;border:0.5px solid var(--border);border-radius:10px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:#fff;color:var(--ink);transition:border-color .2s"
-      oninput="var v=this.value;document.getElementById('lg-geo-city').value=v;if(v)document.getElementById('v2-loc-text').textContent='📍 '+v;">
-    <button onclick="detectLocationLanding()" style="padding:9px 14px;border:0.5px solid var(--border);border-radius:10px;font-size:12px;background:#fff;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:var(--muted)">📍 Auto-detect</button>
-  </div>
+      <input id="v2-geo-city" list="city-suggestions"
+        placeholder="Type a city (e.g. Atlanta, GA)"
+        style="flex:1;padding:10px 14px;border:0.5px solid var(--border);border-radius:10px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:#fff;color:var(--ink);transition:border-color .2s"
+        oninput="var v=this.value;document.getElementById('lg-geo-city').value=v;if(v)document.getElementById('v2-loc-text').textContent='📍 '+v;">
+      <button onclick="detectLocationV2()" style="padding:9px 14px;border:0.5px solid var(--border);border-radius:10px;font-size:12px;background:#fff;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:var(--muted)">📍 Auto-detect</button>
+    </div>
     <div id="v2-country-wrap" style="display:none;position:relative">
       <input id="v2-geo-country"
-        placeholder="Type or select a country..."
+        placeholder="Type a country (e.g. United States, India, Germany)"
+        list="country-suggestions"
         style="width:100%;padding:10px 14px;border:0.5px solid var(--border);border-radius:10px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:#fff;color:var(--ink)"
-        oninput="filterCountries(this.value);document.getElementById('v2-country-list').style.display='block'"
-        onfocus="filterCountries(this.value||'')" 
-        onblur="setTimeout(function(){var l=document.getElementById('v2-country-list');if(l)l.style.display='none'},250)">
-      <div id="v2-country-list" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:0.5px solid var(--border);border-radius:10px;max-height:200px;overflow-y:auto;z-index:20;box-shadow:0 4px 16px rgba(0,0,0,.08)"></div>
+        oninput="var v=this.value;var lg=document.getElementById('lg-geo-country');if(lg)lg.value=v;var lt=document.getElementById('v2-loc-text');if(lt&&v)lt.textContent='🏳️ '+v;">
     </div>
   </div>
-
-
 </div>
 
+<!-- Search block — appears below cards, adapts per persona -->
 <div class="lens-section">
-  <p class="section-label">Choose how to look at it</p>
+  <p class="section-label">Pick your lens</p>
   <div class="flip-row">
 
     <!-- The Founder -->
-    <div class="flip-card active-lens" data-lens="0" id="card-0" onclick="handleCardClick(0)">
+    <div class="flip-card" data-lens="0" id="card-0" onclick="handleCardClick(0)">
       <div class="flip-inner">
         <div class="flip-front">
           <div class="card-illustration">🌱</div>
@@ -2442,7 +2515,7 @@ function twTick(){
 
 // ── PERSIST ──
 function saveS(){try{localStorage.setItem("sift_state",JSON.stringify({intent:S.intent,geo:S.geo,visa:S.visa,sort:S.sort,mode:S.mode,profile:S.profile}))}catch(e){}}
-function loadS(){try{var d=JSON.parse(localStorage.getItem("sift_state")||"{}");if(d.intent)selectPersona(d.intent,true);if(d.geo)setGeo(d.geo);if(d.visa)S.visa=d.visa;if(d.sort){S.sort=d.sort;var ss=document.getElementById("sort-sel");if(ss)ss.value=d.sort;}if(d.mode)setMode(d.mode);if(d.profile){S.profile=Object.assign(S.profile,d.profile);updateProfileUI();}}catch(e){}}
+function loadS(){try{var d=JSON.parse(localStorage.getItem("sift_state")||"{}");if(d.intent)S.intent=d.intent;if(d.geo)setGeo(d.geo);if(d.visa)S.visa=d.visa;if(d.sort){S.sort=d.sort;var ss=document.getElementById("sort-sel");if(ss)ss.value=d.sort;}if(d.mode)setMode(d.mode);if(d.profile){S.profile=Object.assign(S.profile,d.profile);updateProfileUI();}}catch(e){}}
 function updateProfileUI(){var hasName=S.profile.name&&S.profile.name.trim().length>0;gset("profile-initial","textContent",hasName?S.profile.name.charAt(0).toUpperCase():"?");gset("profile-name","textContent",hasName?S.profile.name:"Set up profile");}
 
 // ── PERSONA SELECTION + THEME ──
@@ -2450,6 +2523,10 @@ function selectPersona(intent,silent){try{
   var prevIntent=S.intent;
   if(intent===prevIntent&&!silent&&document.body.classList.contains("app-mode"))return;
   setIntent(intent);
+  // Sync filter drawer buttons with current persona
+  document.querySelectorAll('#i-collab,#i-job,#i-network').forEach(function(b){b.classList.remove('on');});
+  var activeFilter=document.getElementById('i-'+intent);
+  if(activeFilter)activeFilter.classList.add('on');
   document.querySelectorAll(".persona").forEach(function(p){p.classList.remove("selected")});
   var card=document.getElementById("persona-"+intent);
   if(card)card.classList.add("selected");
@@ -2650,6 +2727,11 @@ function closeFilters(){
       if(newCard)newCard.classList.add("flipped");
       flippedCard=newIdx;
       // setLens handles theme + prompt update
+      // Flip the correct card
+      document.querySelectorAll('.flip-card').forEach(function(c){c.classList.remove('flipped');});
+      var newCard=document.getElementById('card-'+newIdx);
+      if(newCard)newCard.classList.add('flipped');
+      flippedCard=newIdx;
       setLens(newIdx);
     }
     // If switching TO connector from anything — show connector empty state in app mode
@@ -2691,6 +2773,11 @@ function setIntent(v){var _prevIntent=S.intent;S.intent=v;document.body.classLis
   }
 }
 function setGeo(v){
+  // Sync v2 landing scope pills (region=0, country=1, world=2)
+  var scopeIdx={region:0,country:1,world:2}[v];
+  if(scopeIdx!==undefined){
+    document.querySelectorAll('.scope-pill').forEach(function(p,j){p.classList.toggle('active',j===scopeIdx);});
+  }
   // Sync landing geo buttons
   var lgmap={region:"lg-region",country:"lg-country",world:"lg-world"};
   ["region","country","world"].forEach(function(k){var el=document.getElementById(lgmap[k]);if(el)el.classList.toggle("on",k===v);});
@@ -2715,6 +2802,19 @@ function setGeo(v){
   updateFilterCount();saveS();if(S.query)buildResults();
 }
 function detectLocation(){var inp=document.getElementById("geo-city");if(!inp)return;inp.value="Detecting...";inp.disabled=true;fetch("https://ipapi.co/json/").then(function(r){return r.json()}).then(function(d){inp.value=(d.city||"")+(d.region_code?", "+d.region_code:"");inp.disabled=false;}).catch(function(){inp.value="";inp.placeholder="Enter your city manually";inp.disabled=false;});}
+
+function detectLocationV2(){
+  var inp=document.getElementById("v2-geo-city");
+  if(!inp)return;
+  inp.value="Detecting...";inp.disabled=true;
+  fetch("https://ipapi.co/json/").then(function(r){return r.json()}).then(function(d){
+    var city=(d.city||"")+(d.region_code?", "+d.region_code:"");
+    inp.value=city;inp.disabled=false;
+    var lg=document.getElementById("lg-geo-city");if(lg)lg.value=city;
+    var lt=document.getElementById("v2-loc-text");if(lt)lt.textContent="📍 "+city;
+  }).catch(function(){inp.value="";inp.placeholder="Enter your city manually";inp.disabled=false;});
+}
+
 function detectLocationLanding(){var inp=document.getElementById("lg-geo-city");if(!inp)return;inp.value="Detecting...";inp.disabled=true;fetch("https://ipapi.co/json/").then(function(r){return r.json()}).then(function(d){inp.value=(d.city||"")+(d.region_code?", "+d.region_code:"");inp.disabled=false;}).catch(function(){inp.value="";inp.placeholder="Enter your city manually";inp.disabled=false;});}
 function toggleVisa(){S.visa=!S.visa;var vc=document.getElementById("visa-check");if(vc)vc.innerHTML=S.visa?"&#9745;":"&#9744;";var vt=document.getElementById("visa-toggle");if(vt)vt.classList.toggle("on",S.visa);updateFilterCount();saveS();if(document.body.classList.contains("app-mode")&&S.currentCo){var _ri=companies.indexOf(S.currentCo);if(_ri>-1)setTimeout(function(){openCompany(_ri);},50);}}
 function setSort(v){S.sort=v;saveS();if(S.query)buildResults();}
@@ -3036,11 +3136,13 @@ async function fetchOneCard(q,key,idx,total){
     var city=document.getElementById("lg-geo-city");
     var cityVal=city&&city.value?city.value.trim():"";
     if(!cityVal){var gc=document.getElementById("geo-city");cityVal=gc&&gc.value?gc.value.trim():"";}
+    if(!cityVal){var v2c=document.getElementById("v2-geo-city");cityVal=v2c&&v2c.value?v2c.value.trim():"";}
     geoClause=cityVal?"Only return companies with a physical presence (headquarters, office, or significant team) within 250 miles of "+cityVal+". This includes remote-first companies with offices or teams in that region. Do NOT return companies with no presence near "+cityVal+". ":"Only return companies with a presence near the user's location. ";
   } else if(S.geo==="country"){
     var country=document.getElementById("lg-geo-country");
     var countryVal=country&&country.value?country.value.trim():"";
     if(!countryVal){var gc2=document.getElementById("geo-country-search");countryVal=gc2&&gc2.value?gc2.value.trim():"";}
+    if(!countryVal){var v2co=document.getElementById("v2-geo-country");countryVal=v2co&&v2co.value?v2co.value.trim():"";}
     geoClause=countryVal?"Only return companies with a significant presence (HQ, office, or team) in "+countryVal+". This includes companies founded or operating in "+countryVal+", not just those headquartered there. ":"";
   }
   // If fewer results due to geo — that's fine, return what exists (can be fewer than total)
@@ -4500,8 +4602,34 @@ function showLinkedInSend(idx){var p=S.currentPeople[idx];if(!p)return;document.
 var _sq=document.getElementById("sq");if(_sq)_sq.addEventListener("keydown",function(e){if(e.key==="Enter")doSearch()});
 var _asq=document.getElementById("app-sq");if(_asq)_asq.addEventListener("keydown",function(e){if(e.key==="Enter")appSearch()});
 var _act=document.getElementById("app-conn-to");if(_act)_act.addEventListener("keydown",function(e){if(e.key==="Enter")appConnSearch()});
-companies=companies.map(normalizeCompany);loadS();updateProfileUI();updateFilterCount();setTimeout(twTick,600);checkFirstRun();
-if(!document.querySelector(".persona.selected"))selectPersona("collab",true);
+companies=companies.map(normalizeCompany);loadS(); S.intent=S.intent||"collab";
+// Force neutral landing theme regardless of saved state
+document.body.classList.remove("theme-terra","theme-indigo","theme-teal");
+document.body.classList.add("theme-neutral");
+document.body.style.background="#F1EDE4";
+var _vl=document.getElementById("v2-landing");if(_vl)_vl.style.background="#F1EDE4";
+var _nv=document.getElementById("nav");if(_nv)_nv.style.background="#F1EDE4";
+updateProfileUI();updateFilterCount();setTimeout(twTick,600);checkFirstRun();
+// Ensure all cards are unflipped on load
+document.querySelectorAll('.flip-card').forEach(function(c){c.classList.remove('flipped');});
+flippedCard=null;
+  // Hash routing: app.html#founder auto-selects Founder
+  var hash=window.location.hash.replace('#','').toLowerCase();
+  if(hash){
+    var hashMap={founder:0,climber:1,connector:2};
+    var idx=hashMap[hash];
+    if(idx!==undefined){
+      setTimeout(function(){handleCardClick(idx);},400);
+    }
+  }
+  // Update hash when persona changes
+  window._siftSetHash=function(intent){
+    var intentToHash={collab:'founder',job:'climber',network:'connector'};
+    var h=intentToHash[intent];
+    if(h)history.replaceState(null,null,'#'+h);
+  };
+
+// No auto-selection on load — user picks their lens
 
 </script>
 
@@ -4597,25 +4725,36 @@ function setLens(i){try{
   var sub=document.getElementById('search-sub');
   var searchGo=document.getElementById('search-go');
   var searchInput=document.getElementById('search-input');
+  // Update main headline per persona
+  var mainHed=document.getElementById('landing-hed');
+  var hedTexts=['What market interests you?','Where should you work next?','What role is next for you?'];
+  if(mainHed){
+    mainHed.style.transition='opacity 0.3s ease';
+    mainHed.style.opacity='0';
+    setTimeout(function(){
+      mainHed.textContent=hedTexts[i];
+      mainHed.style.opacity='1';
+    },300);
+  }
+  // Update search prompt + button per persona
   if(lensIntents[i]==='network'){
-    // Connector on landing — show transition UI instead of domain search
-    if(prompt){prompt.style.opacity='0';setTimeout(function(){prompt.textContent='What role is next for you?';prompt.style.opacity='1';},150);}
-    if(sub)sub.textContent='Type your destination role and click Map.';
+    if(prompt){prompt.style.opacity='0';setTimeout(function(){prompt.textContent='Map your transition';prompt.style.opacity='1';},150);}
     if(searchGo)searchGo.textContent='Map →';
     if(searchInput)searchInput.placeholder='e.g. Product Manager, AI Engineer, Startup Founder...';
   } else {
     if(searchGo)searchGo.textContent='Find →';
+    if(searchInput)searchInput.placeholder='e.g. climate software, AI infrastructure, fintech spend…';
     if(prompt){
       prompt.style.opacity='0';
       setTimeout(function(){
         prompt.textContent=lensPromptTexts[i][0];
-        if(sub)sub.textContent=lensPromptTexts[i][1];
         prompt.style.opacity='1';
       },150);
     }
   }
   // Wire to selectPersona
   selectPersona(lensIntents[i]);
+  if(window._siftSetHash)window._siftSetHash(lensIntents[i]);
 }catch(e){console.error("setLens error:",e&&e.message?e.message:String(e));}}
 
 function handleCardClick(i){try{
@@ -4756,10 +4895,10 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   if(goBtn)goBtn.addEventListener('click',doV2Search);
   if(inp)inp.addEventListener('keydown',function(e){if(e.key==='Enter')doV2Search();});
-  // Auto-flip Founder card on load
+  // No auto-flip — all cards start face-up
   setTimeout(function(){
-    var c0=document.getElementById('card-0');
-    if(c0){c0.classList.add('flipped');flippedCard=0;}
+    // var c0 — not needed, no auto-flip
+    // removed: cards start unflipped
   },900);
   // Start typewriter
   twStart(S.intent||"collab");
