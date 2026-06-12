@@ -4629,6 +4629,22 @@ flippedCard=null;
       setTimeout(function(){handleCardClick(idx);},400);
     }
   }
+
+  // Sync scope pills with restored S.geo on load
+  (function(){
+    var geoToIdx={region:0,country:1,world:2};
+    var savedIdx=geoToIdx[S.geo];
+    if(savedIdx===undefined)savedIdx=0;
+    var pills=document.querySelectorAll('.scope-pill');
+    pills.forEach(function(p,j){p.classList.toggle('active',j===savedIdx);});
+    var locText=document.getElementById('v2-loc-text');
+    if(locText){
+      if(savedIdx===2)locText.textContent='🌍 Worldwide';
+      else if(savedIdx===1)locText.textContent='🏳️ My country';
+      else locText.textContent='📍 Alpharetta, GA';
+    }
+  })();
+
   // Update hash when persona changes
   window._siftSetHash=function(intent){
     try{
@@ -4810,7 +4826,12 @@ function setScope(el,i){
   if(expand)expand.style.display=(i===0||i===1)?'block':'none';
   if(cityWrap)cityWrap.style.display=i===0?'flex':'none';
   if(countryWrap)countryWrap.style.display=i===1?'block':'none';
-  if(i===2&&locText)locText.textContent='🌍 Worldwide';
+  // Update loc-text to match the selected scope
+  if(locText){
+    if(i===0){var cv=document.getElementById('v2-geo-city');locText.textContent='📍 '+((cv&&cv.value)?cv.value:'Near me');}
+    else if(i===1){var cc=document.getElementById('v2-geo-country');locText.textContent='🏳️ '+((cc&&cc.value)?cc.value:'My country');}
+    else if(i===2){locText.textContent='🌍 Worldwide';}
+  }
   // Also sync the hidden app-mode geo elements if they exist
   var appGeoCity=document.getElementById('geo-city');
   var appGeoCountry=document.getElementById('geo-country-search');
