@@ -1887,6 +1887,13 @@ body.app-mode.intent-network #topbar-mid-conn { display: flex !important; }
 /* Scope pill hover follows active theme (green/purple/teal) */
 .scope-pill:hover{border-color:var(--p)!important;color:var(--p)!important;background:var(--ps)!important}
 .scope-pill.active{border-color:var(--p)!important;color:var(--pd)!important;background:var(--ps)!important}
+
+/* Emphasized value-word in persona headlines — follows theme color */
+.landing-hed .hed-key{
+  font-style:italic;
+  color:var(--p);
+  font-weight:500;
+}
 </style>
   <meta name="color-scheme" content="light only">
   <meta name="supported-color-schemes" content="light">
@@ -1978,7 +1985,7 @@ body.app-mode.intent-network #topbar-mid-conn { display: flex !important; }
 
 <div class="landing-welcome">
   <p class="landing-eyebrow">Opportunity discovery, not search</p>
-  <h1 class="landing-hed" id="landing-hed">Five opportunities matched to your background.</h1>
+  <h1 class="landing-hed" id="landing-hed">Five opportunities <em class="hed-key">matched</em> to your background.</h1>
   
 </div>
 
@@ -4624,9 +4631,13 @@ flippedCard=null;
   }
   // Update hash when persona changes
   window._siftSetHash=function(intent){
-    var intentToHash={collab:'founder',job:'climber',network:'connector'};
-    var h=intentToHash[intent];
-    if(h)history.replaceState(null,null,'#'+h);
+    try{
+      var intentToHash={collab:'founder',job:'climber',network:'connector'};
+      var h=intentToHash[intent];
+      if(h&&window.history&&window.history.replaceState){
+        history.replaceState(null,'','#'+h);
+      }
+    }catch(e){/* sandboxed iframe blocks replaceState — safe to ignore */}
   };
 
 // No auto-selection on load — user picks their lens
@@ -4727,12 +4738,17 @@ function setLens(i){try{
   var searchInput=document.getElementById('search-input');
   // Update main headline per persona
   var mainHed=document.getElementById('landing-hed');
-  var hedTexts=['What market interests you?','Where should you work next?','What role is next for you?'];
+  // Headlines with the key value-word emphasized in the theme color
+  var hedTexts=[
+    'What <em class="hed-key">market</em> interests you?',
+    'Where should you <em class="hed-key">work</em> next?',
+    'What <em class="hed-key">role</em> is next for you?'
+  ];
   if(mainHed){
     mainHed.style.transition='opacity 0.3s ease';
     mainHed.style.opacity='0';
     setTimeout(function(){
-      mainHed.textContent=hedTexts[i];
+      mainHed.innerHTML=hedTexts[i];
       mainHed.style.opacity='1';
     },300);
   }
