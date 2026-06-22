@@ -1899,6 +1899,27 @@ body.app-mode.intent-network #topbar-mid-conn { display: flex !important; }
   <meta name="supported-color-schemes" content="light">
 </head>
 <body class="theme-neutral">
+
+<!-- OUT OF FREE SEARCHES PAYWALL -->
+<div id="sift-paywall" style="display:none;position:fixed;inset:0;background:rgba(26,31,46,0.72);backdrop-filter:blur(6px);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#F7F5F0;border-radius:20px;max-width:460px;width:100%;padding:40px 36px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.4);position:relative">
+    <button onclick="document.getElementById('sift-paywall').style.display='none'" style="position:absolute;top:16px;right:18px;background:none;border:none;font-size:22px;color:#9D9389;cursor:pointer;line-height:1">&times;</button>
+    <div style="font-size:34px;margin-bottom:14px">&#127881;</div>
+    <h2 style="font-family:'Fraunces',serif;font-size:26px;font-weight:500;color:#1F1A14;letter-spacing:-.02em;margin:0 0 12px">You have used your <em style="font-style:italic;color:#1E5A6B">3 free searches</em> today</h2>
+    <p style="font-size:15px;color:#5C544C;line-height:1.6;margin:0 0 26px">Add your own Anthropic API key to keep going (unlimited, free, and your key stays in your browser). Or come back tomorrow for 3 more.</p>
+    <div style="text-align:left;background:#fff;border:1px solid #E6DBC4;border-radius:12px;padding:16px;margin-bottom:18px">
+      <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#9D9389;margin-bottom:8px">Your Anthropic API key</label>
+      <input id="paywall-key-input" type="password" placeholder="sk-ant-..." style="width:100%;padding:11px 14px;border:1px solid #E6DBC4;border-radius:9px;font-size:13px;font-family:'JetBrains Mono',monospace;outline:none;background:#FAFAF8;color:#1F1A14;box-sizing:border-box">
+      <button onclick="savePaywallKey()" style="width:100%;margin-top:10px;padding:12px;background:#1F1A14;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif">Unlock unlimited searches &rarr;</button>
+      <p style="font-size:11px;color:#9D9389;margin:10px 0 0;line-height:1.5">Get a key free at <a href="https://console.anthropic.com" target="_blank" style="color:#1E5A6B">console.anthropic.com</a>. New accounts get ~$5 free credit. Your key is stored only in this browser.</p>
+    </div>
+    <div style="font-size:13px;color:#5C544C;line-height:1.6">
+      Building something where Sift could help? <br>
+      <a href="mailto:bahetianjali10@gmail.com?subject=Sift" style="color:#1E5A6B;font-weight:500">Email me &mdash; bahetianjali10@gmail.com</a>
+    </div>
+  </div>
+</div>
+
 <datalist id="city-suggestions">
 <option value="Atlanta, GA"><option value="Alpharetta, GA"><option value="New York, NY"><option value="San Francisco, CA"><option value="Seattle, WA"><option value="Austin, TX"><option value="Boston, MA"><option value="Chicago, IL"><option value="Denver, CO"><option value="Los Angeles, CA"><option value="Miami, FL"><option value="Washington, DC"><option value="Dallas, TX"><option value="Houston, TX"><option value="Philadelphia, PA"><option value="Phoenix, AZ"><option value="San Diego, CA"><option value="San Jose, CA"><option value="Portland, OR"><option value="Nashville, TN"><option value="Charlotte, NC"><option value="Raleigh, NC"><option value="Minneapolis, MN"><option value="Salt Lake City, UT"><option value="Pittsburgh, PA"><option value="Detroit, MI"><option value="Columbus, OH"><option value="Tampa, FL"><option value="Orlando, FL"><option value="Kansas City, MO"><option value="St. Louis, MO"><option value="Toronto, ON"><option value="Vancouver, BC"><option value="London, UK"><option value="Berlin, Germany"><option value="Bangalore, India"><option value="Mumbai, India"><option value="Singapore"><option value="Sydney, Australia"><option value="Dublin, Ireland">
 </datalist>
@@ -2013,6 +2034,7 @@ body.app-mode.intent-network #topbar-mid-conn { display: flex !important; }
     <div class="row-divider"></div>
     <span class="loc-text" id="v2-loc-text">📍 Alpharetta, GA</span>
   </div>
+  <div id="free-quota-pill" style="margin-top:14px;font-size:12px;color:#9D9389;text-align:center"></div>
   <!-- Inline geo inputs — appear when Near me or My country selected -->
   <div id="v2-geo-expand" style="display:none;margin-top:12px;max-width:480px;margin-left:auto;margin-right:auto">
     <div id="v2-city-wrap" style="display:none;flex-direction:row;gap:8px;align-items:center">
@@ -2853,12 +2875,80 @@ function fill(v){var sq=document.getElementById("sq");if(sq)sq.value=v;var si=do
 function fillAndSearch(v){fill(v);doSearch();}
 function fillTransition(from,to){var f=document.getElementById("conn-from");var t2=document.getElementById("conn-to");if(f)f.value=from;if(t2)t2.value=to;}
 function pickTransEx(el){var ex=transitionData.examples[parseInt(el.dataset.idx,10)];if(ex)fillTransition(ex.from,ex.to);}
+
+// ════════════════════════════════════════════
+// FREE SEARCH QUOTA (3 per device per day)
+// ════════════════════════════════════════════
+var SIFT_FREE_LIMIT=3;
+function _todayKey(){
+  var d=new Date();
+  return d.getUTCFullYear()+"-"+(d.getUTCMonth()+1)+"-"+d.getUTCDate();
+}
+function getFreeSearchesUsed(){
+  try{
+    var raw=localStorage.getItem("sift_free_quota");
+    if(!raw)return 0;
+    var o=JSON.parse(raw);
+    if(o.day!==_todayKey())return 0; // reset daily
+    return o.count||0;
+  }catch(e){return 0;}
+}
+function incrementFreeSearches(){
+  try{
+    var used=getFreeSearchesUsed();
+    localStorage.setItem("sift_free_quota",JSON.stringify({day:_todayKey(),count:used+1}));
+  }catch(e){}
+}
+function freeSearchesRemaining(){return Math.max(0,SIFT_FREE_LIMIT-getFreeSearchesUsed());}
+// Has the user supplied their OWN key? Then they are never gated.
+function userHasOwnKey(){
+  var k=S&&S.profile&&S.profile.key;
+  return !!(k&&k.length>10);
+}
+// Gate check — returns true if the search may proceed
+function canSearch(){
+  if(userHasOwnKey())return true;       // own key = unlimited
+  if(freeSearchesRemaining()>0)return true; // free quota left
+  return false;                          // out of free + no key
+}
+
+
+function savePaywallKey(){
+  var inp=document.getElementById("paywall-key-input");
+  if(!inp)return;
+  var k=inp.value.trim();
+  if(!k||k.length<10){showToast&&showToast("Please paste a valid API key");return;}
+  S.profile.key=k;
+  if(typeof saveS==="function")saveS();
+  if(typeof updateProfileUI==="function")updateProfileUI();
+  document.getElementById("sift-paywall").style.display="none";
+  showToast&&showToast("Key saved — unlimited searches unlocked");
+  if(typeof updateQuotaPill==="function")updateQuotaPill();
+}
+
+function updateQuotaPill(){
+  var pill=document.getElementById("free-quota-pill");
+  if(!pill)return;
+  if(userHasOwnKey()){pill.innerHTML="&#10003; Using your own key &mdash; unlimited searches";pill.style.color="#3D6B40";return;}
+  var left=freeSearchesRemaining();
+  if(left>0){pill.innerHTML=left+" free search"+(left===1?"":"es")+" left today &middot; <a href=\"#\" onclick=\"showPaywall();return false;\" style=\"color:#1E5A6B\">add your key</a> for unlimited";}
+  else{pill.innerHTML="No free searches left today &middot; <a href=\"#\" onclick=\"showPaywall();return false;\" style=\"color:#1E5A6B\">add your key</a> to continue";}
+}
+
+function showPaywall(){
+  var p=document.getElementById("sift-paywall");
+  if(p)p.style.display="flex";
+}
+
 function doSearch(){
   var sqEl=document.getElementById("sq");
   var siEl=document.getElementById("search-input");
   var q=(sqEl?sqEl.value.trim():"") || (siEl?siEl.value.trim():"");
   if(sqEl&&siEl&&!sqEl.value.trim()&&siEl.value.trim())sqEl.value=siEl.value.trim();
   if(!q)return;
+  // FREE QUOTA GATE — only gate real AI searches (user has a bio), not demo lookups
+  var _hasBioForGate=S.profile.bio&&S.profile.bio.trim().length>10;
+  if(_hasBioForGate&&!canSearch()){showPaywall();return;}
   S.query=q;
   // Check for hardcoded demo match first
   var demoMatch=companies.filter(function(c){
@@ -2904,6 +2994,8 @@ function doSearch(){
     S.usingAI=true;
     S._userPickedCard=false;
     S.totalTokens=0;
+    if(!userHasOwnKey())incrementFreeSearches(); // count this free search
+    if(typeof updateQuotaPill==="function")setTimeout(updateQuotaPill,100);
     enterAppMode(false);
     buildResults(); // show empty state immediately
     doProgressiveSearch(q,key,0,5);
@@ -3131,7 +3223,7 @@ function loadNarrate(msg){
 function loadNarrateReset(){loadSteps=[];}
 
 async function fetchOneCard(q,key,idx,total){
-  if(!key||key.trim().length<10){console.warn("fetchOneCard: no key");return null;}
+  if(!userHasOwnKey()&&!canSearch()){console.warn("fetchOneCard: no key and no free quota");return null;}
   loadNarrate("Finding match "+(idx+1)+" of "+total+" for \""+q+"\"...");
   var bio=S.profile.bio||"Backend engineer";
   var intentLabel={"collab":"founder looking for collaborators","job":"climber looking for their next role","network":"connector mapping transitions"}[S.intent]||"professional";
@@ -3469,6 +3561,9 @@ function doConnectorSearch(){
     from.value=rmD?rmD[1]:"Software Engineer";
   }
   if(!from||!to||!from.value.trim()||!to.value.trim()){console.warn("doConnectorSearch: missing from/to");return;}
+  // Free quota gate for connector (only when using free searches)
+  if(!canSearch()){showPaywall();return;}
+  if(!userHasOwnKey())incrementFreeSearches();
   var nFrom=normalizeRole(from.value.trim());
   var nTo=normalizeRole(to.value.trim());
   var key=nFrom+"→"+nTo;
@@ -3835,7 +3930,7 @@ function renderFunding(el,d){
   el.innerHTML=html;
 }
 async function prefetchFounderTabs(c,key){
-  if(!key||key.trim().length<10)return;
+  if(!userHasOwnKey()&&!useWorker())return;
   if(c._founderTabsFetched||c._founderTabsFetching)return;
   c._founderTabsFetching=true;
   try{
@@ -3867,23 +3962,54 @@ async function prefetchFounderTabs(c,key){
     console.error("prefetchFounderTabs error:",e);
   }
 }
-async function siftAICall(prompt,key){
-  if(!key||key.trim().length<10){console.warn("siftAICall blocked: no API key");return null;}
-  try{
-    var isOpenAI=key&&key.startsWith("sk-")&&!key.startsWith("sk-ant-");
-    var resp,data;
-    if(isOpenAI){
-      resp=await fetch("https://api.openai.com/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model:S.profile.oaiModel||"gpt-4o",max_tokens:6000,messages:[{role:"user",content:prompt}]})});
-      data=await resp.json();
-      return data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content;
-    } else {
-      resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:S.profile.anthModel||"claude-sonnet-4-6",max_tokens:6000,messages:[{role:"user",content:prompt}]})});
-      data=await resp.json();
-      var t=(data.usage&&((data.usage.input_tokens||0)+(data.usage.output_tokens||0)))||0;
-      if(t&&S)S.totalTokens=(S.totalTokens||0)+t;
-      return data.content&&data.content[0]&&data.content[0].text;
+
+// ════════════════════════════════════════════
+// BACKEND ROUTING — Worker (free tier) vs BYOK
+// ════════════════════════════════════════════
+var SIFT_WORKER_URL="https://sift-proxy.bahetianjali10.workers.dev/";
+// Returns true if we should route through the Worker (no own key, free quota available)
+function useWorker(){
+  return !userHasOwnKey();
+}
+// Unified Anthropic-style call: routes to Worker OR direct based on key presence
+async function callClaude(prompt){
+  var bodyObj={model:(S.profile.anthModel||"claude-sonnet-4-6"),max_tokens:6000,messages:[{role:"user",content:prompt}]};
+  if(useWorker()){
+    // Route through Worker (uses owner's key, enforces quota server-side)
+    var wResp=await fetch(SIFT_WORKER_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(bodyObj)});
+    var wData=await wResp.json();
+    if(!wResp.ok){
+      // Quota or cap hit — surface paywall
+      if(wData&&(wData.error==="quota_exceeded"||wData.error==="daily_cap")){
+        if(typeof showPaywall==="function")showPaywall();
+      }
+      throw new Error(wData&&wData.message?wData.message:"Worker error");
     }
-  }catch(e){console.error("siftAICall error:",e);return null;}
+    var wt=(wData.usage&&((wData.usage.input_tokens||0)+(wData.usage.output_tokens||0)))||0;
+    if(wt&&S)S.totalTokens=(S.totalTokens||0)+wt;
+    return wData.content&&wData.content[0]&&wData.content[0].text;
+  } else {
+    // BYOK — direct to Anthropic with user's own key
+    var key=S.profile.key;
+    var resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify(bodyObj)});
+    var data=await resp.json();
+    var t=(data.usage&&((data.usage.input_tokens||0)+(data.usage.output_tokens||0)))||0;
+    if(t&&S)S.totalTokens=(S.totalTokens||0)+t;
+    return data.content&&data.content[0]&&data.content[0].text;
+  }
+}
+
+async function siftAICall(prompt,key){
+  try{
+    // If the user supplied an OpenAI key, use it directly
+    if(key&&key.startsWith("sk-")&&!key.startsWith("sk-ant-")){
+      var resp=await fetch("https://api.openai.com/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model:S.profile.oaiModel||"gpt-4o",max_tokens:6000,messages:[{role:"user",content:prompt}]})});
+      var data=await resp.json();
+      return data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content;
+    }
+    // Otherwise route through callClaude (Worker for free users, direct for BYOK Anthropic)
+    return await callClaude(prompt);
+  }catch(e){console.error("siftAICall error:",e);throw e;}
 }
 function renderTransitionTab(tab,td){try{
   if(!td)return;
@@ -3926,9 +4052,9 @@ function renderTransitionTab(tab,td){try{
   }
 }catch(e){console.error("renderTransitionTab:",e&&e.message?e.message:String(e));}}
 async function fetchCompanyDetail(c){
-  if(!S.profile.key||S.profile.key.trim().length<10)return;
-  var key=S.profile.key;
-  if(!key||c._detailFetching||c._detailFetched)return;
+  if(!userHasOwnKey()&&!useWorker())return;
+  var key=S.profile.key||"";
+  if(c._detailFetching||c._detailFetched)return;
   c._detailFetching=true;
   var bio=S.profile.bio||"Backend engineer";
   var domain=c.brief&&c.brief.Domain?c.brief.Domain:c.name;
@@ -4616,7 +4742,7 @@ document.body.classList.add("theme-neutral");
 document.body.style.background="#F1EDE4";
 var _vl=document.getElementById("v2-landing");if(_vl)_vl.style.background="#F1EDE4";
 var _nv=document.getElementById("nav");if(_nv)_nv.style.background="#F1EDE4";
-updateProfileUI();updateFilterCount();setTimeout(twTick,600);checkFirstRun();
+updateProfileUI();updateFilterCount();setTimeout(twTick,600);checkFirstRun();if(typeof updateQuotaPill==="function")updateQuotaPill();
 // Ensure all cards are unflipped on load
 document.querySelectorAll('.flip-card').forEach(function(c){c.classList.remove('flipped');});
 flippedCard=null;
