@@ -1900,26 +1900,6 @@ body.app-mode.intent-network #topbar-mid-conn { display: flex !important; }
 </head>
 <body class="theme-neutral">
 
-<!-- OUT OF FREE SEARCHES PAYWALL -->
-<div id="sift-paywall" style="display:none;position:fixed;inset:0;background:rgba(26,31,46,0.72);backdrop-filter:blur(6px);z-index:9999;align-items:center;justify-content:center;padding:20px">
-  <div style="background:#F7F5F0;border-radius:20px;max-width:460px;width:100%;padding:40px 36px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.4);position:relative">
-    <button onclick="document.getElementById('sift-paywall').style.display='none'" style="position:absolute;top:16px;right:18px;background:none;border:none;font-size:22px;color:#9D9389;cursor:pointer;line-height:1">&times;</button>
-    <div style="font-size:34px;margin-bottom:14px">&#127881;</div>
-    <h2 style="font-family:'Fraunces',serif;font-size:26px;font-weight:500;color:#1F1A14;letter-spacing:-.02em;margin:0 0 12px">You have used your <em style="font-style:italic;color:#1E5A6B">3 free searches</em> today</h2>
-    <p style="font-size:15px;color:#5C544C;line-height:1.6;margin:0 0 26px">Add your own Anthropic API key to keep going (unlimited, free, and your key stays in your browser). Or come back tomorrow for 3 more.</p>
-    <div style="text-align:left;background:#fff;border:1px solid #E6DBC4;border-radius:12px;padding:16px;margin-bottom:18px">
-      <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#9D9389;margin-bottom:8px">Your Anthropic API key</label>
-      <input id="paywall-key-input" type="password" placeholder="sk-ant-..." style="width:100%;padding:11px 14px;border:1px solid #E6DBC4;border-radius:9px;font-size:13px;font-family:'JetBrains Mono',monospace;outline:none;background:#FAFAF8;color:#1F1A14;box-sizing:border-box">
-      <button onclick="savePaywallKey()" style="width:100%;margin-top:10px;padding:12px;background:#1F1A14;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif">Unlock unlimited searches &rarr;</button>
-      <p style="font-size:11px;color:#9D9389;margin:10px 0 0;line-height:1.5">Get a key free at <a href="https://console.anthropic.com" target="_blank" style="color:#1E5A6B">console.anthropic.com</a>. New accounts get ~$5 free credit. Your key is stored only in this browser.</p>
-    </div>
-    <div style="font-size:13px;color:#5C544C;line-height:1.6">
-      Building something where Sift could help? <br>
-      <a href="mailto:bahetianjali10@gmail.com?subject=Sift" style="color:#1E5A6B;font-weight:500">Email me &mdash; bahetianjali10@gmail.com</a>
-    </div>
-  </div>
-</div>
-
 <datalist id="city-suggestions">
 <option value="Atlanta, GA"><option value="Alpharetta, GA"><option value="New York, NY"><option value="San Francisco, CA"><option value="Seattle, WA"><option value="Austin, TX"><option value="Boston, MA"><option value="Chicago, IL"><option value="Denver, CO"><option value="Los Angeles, CA"><option value="Miami, FL"><option value="Washington, DC"><option value="Dallas, TX"><option value="Houston, TX"><option value="Philadelphia, PA"><option value="Phoenix, AZ"><option value="San Diego, CA"><option value="San Jose, CA"><option value="Portland, OR"><option value="Nashville, TN"><option value="Charlotte, NC"><option value="Raleigh, NC"><option value="Minneapolis, MN"><option value="Salt Lake City, UT"><option value="Pittsburgh, PA"><option value="Detroit, MI"><option value="Columbus, OH"><option value="Tampa, FL"><option value="Orlando, FL"><option value="Kansas City, MO"><option value="St. Louis, MO"><option value="Toronto, ON"><option value="Vancouver, BC"><option value="London, UK"><option value="Berlin, Germany"><option value="Bangalore, India"><option value="Mumbai, India"><option value="Singapore"><option value="Sydney, Australia"><option value="Dublin, Ireland">
 </datalist>
@@ -2189,8 +2169,11 @@ body.app-mode.intent-network #topbar-mid-conn { display: flex !important; }
         </div>
       </div>
     </div>
+    <div class="modal-section" id="settings-quota-section" style="display:none">
+      <div id="settings-quota-banner" style="background:var(--ps);border:1px solid var(--p);border-radius:9px;padding:12px 14px;font-size:12px;line-height:1.6"></div>
+    </div>
     <div class="modal-section">
-      <label class="modal-label">API Key (free)</label>
+      <label class="modal-label">Your own API key</label>
       <div style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:10px;font-size:12px;line-height:1.7;color:var(--ink2)">
         <div style="font-weight:700;color:var(--ink);margin-bottom:6px">Add your own key for unlimited searches</div>
 
@@ -2857,6 +2840,14 @@ function openSettings(){
   document.getElementById("setting-key").value=S.profile.key||"";var liEl=document.getElementById("setting-li");if(liEl)liEl.value=S.profile.li||"";
   var keyVal=S.profile.key||"";
   setTimeout(function(){detectKeyProvider(keyVal);},50);
+  var qb=document.getElementById("settings-quota-banner");var qs=document.getElementById("settings-quota-section");
+  if(qb&&qs){
+    if(userHasOwnKey()){qs.style.display="none";}
+    else{var _left=freeSearchesRemaining();qs.style.display="";
+      if(_left>0){qb.innerHTML='<div style="font-weight:700;color:var(--ink);margin-bottom:4px">You have '+_left+' free search'+(_left===1?'':'es')+' left today</div><div style="color:var(--ink2)">Sift runs these on its own key so you can try it for free. After your '+SIFT_FREE_LIMIT+' free searches, add your own key below for unlimited use. Your key is billed by Anthropic, not by Sift (a $5 prepaid balance covers many searches), and it stays in your browser.</div>';}
+      else{qb.innerHTML='<div style="font-weight:700;color:var(--ink);margin-bottom:4px">You have used your '+SIFT_FREE_LIMIT+' free searches today</div><div style="color:var(--ink2)">Add your own key below for unlimited use. Your key is billed by Anthropic, not by Sift (about $5 prepaid to start), and it stays in your browser. Or come back tomorrow for '+SIFT_FREE_LIMIT+' more.</div>';}
+    }
+  }
   document.getElementById("settings-modal").classList.add("open");}
 function closeSettings(){document.getElementById("settings-modal").classList.remove("open");}
 function saveSettings(){S.profile.name=document.getElementById("setting-name").value.trim();S.profile.bio=document.getElementById("setting-bio").value.trim();S.profile.li=document.getElementById("setting-li")?document.getElementById("setting-li").value.trim():"";S.profile.key=document.getElementById("setting-key").value.trim();
@@ -2913,19 +2904,6 @@ function canSearch(){
 }
 
 
-function savePaywallKey(){
-  var inp=document.getElementById("paywall-key-input");
-  if(!inp)return;
-  var k=inp.value.trim();
-  if(!k||k.length<10){showToast&&showToast("Please paste a valid API key");return;}
-  S.profile.key=k;
-  if(typeof saveS==="function")saveS();
-  if(typeof updateProfileUI==="function")updateProfileUI();
-  document.getElementById("sift-paywall").style.display="none";
-  showToast&&showToast("Key saved — unlimited searches unlocked");
-  if(typeof updateQuotaPill==="function")updateQuotaPill();
-}
-
 function updateQuotaPill(){
   var pill=document.getElementById("free-quota-pill");
   if(!pill)return;
@@ -2936,8 +2914,8 @@ function updateQuotaPill(){
 }
 
 function showPaywall(){
-  var p=document.getElementById("sift-paywall");
-  if(p)p.style.display="flex";
+  // Single unified modal: open Profile & Setup; its quota banner explains the gate.
+  if(typeof openSettings==="function")openSettings();
 }
 
 function doSearch(){
